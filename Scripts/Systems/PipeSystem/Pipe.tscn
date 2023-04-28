@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3 uid="uid://db52uqgqi1jml"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/PipeSystem/Pipe.cs" id="1_wmqta"]
+[ext_resource type="Texture2D" uid="uid://d3pd3ik1cgwc" path="res://Common/Materials/uvMaterial/TemplateGrid_albedo.png" id="2_hu0iy"]
+[ext_resource type="Texture2D" uid="uid://rr2l1lxw0k1x" path="res://Common/Materials/uvMaterial/TemplateGrid_orm.png" id="3_meijd"]
+[ext_resource type="Texture2D" uid="uid://bici6k2im01rm" path="res://Common/Materials/uvMaterial/TemplateGrid_normal.png" id="4_6n1cx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dpcqb"]
+albedo_texture = ExtResource("2_hu0iy")
+metallic = 1.0
+metallic_texture = ExtResource("3_meijd")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("3_meijd")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_texture = ExtResource("4_6n1cx")
+ao_enabled = true
+ao_texture = ExtResource("3_meijd")
+uv1_triplanar = true
+texture_filter = 5
+
+[node name="Pipe" type="Area3D"]
+collision_layer = 3
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_wmqta")
+_meshVertices = PackedVector2Array(-0.245, -0.049, -0.25, 0, -0.245, 0.049, -0.231, 0.096, -0.208, 0.139, -0.177, 0.177, -0.139, 0.208, -0.096, 0.231, -0.049, 0.245, 0, 0.25, 0.049, 0.245, 0.096, 0.231, 0.139, 0.208, 0.177, 0.177, 0.208, 0.139, 0.231, 0.096, 0.245, 0.049, 0.25, 0, 0.245, -0.049)
+Material = SubResource("StandardMaterial3D_dpcqb")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+billboard = 1
+font_size = 40
+outline_size = 10

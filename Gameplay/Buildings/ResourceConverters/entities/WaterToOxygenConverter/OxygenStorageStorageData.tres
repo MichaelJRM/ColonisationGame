@@ -1,0 +1,9 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://cig6dr0p71tl0"]
+
+[ext_resource type="Resource" uid="uid://b3nomjajkj585" path="res://Gameplay/WorldResources/entities/OxygenResource.tres" id="1_mgik5"]
+[ext_resource type="Script" path="res://Scripts/WorldResources/ResourceStorageData.cs" id="2_k14ub"]
+
+[resource]
+script = ExtResource("2_k14ub")
+Capacity = 100.0
+Resource = ExtResource("1_mgik5")

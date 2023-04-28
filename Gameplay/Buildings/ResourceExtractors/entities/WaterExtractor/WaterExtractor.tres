@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://cevn642guoult"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/BuildingSystem/BuildingResource.cs" id="1_eb01k"]
+[ext_resource type="PackedScene" uid="uid://cg0u7pbmawqai" path="res://Gameplay/Buildings/ResourceExtractors/entities/WaterExtractor/WaterExtractor.tscn" id="1_n5i80"]
+
+[resource]
+script = ExtResource("1_eb01k")
+Id = "WaterExtractor"
+Name = "WaterExtractor"
+Scene = ExtResource("1_n5i80")

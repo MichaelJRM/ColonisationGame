@@ -1,0 +1,59 @@
+[gd_scene load_steps=8 format=3 uid="uid://vlj0hpa7dw7f"]
+
+[ext_resource type="PackedScene" uid="uid://cgalnxwfl3wc" path="res://Gameplay/Buildings/Building.tscn" id="1_8kdgs"]
+[ext_resource type="Resource" uid="uid://ck3hhrhusu8mr" path="res://Gameplay/WorldResources/entities/WaterResource.tres" id="2_dujo4"]
+[ext_resource type="PackedScene" uid="uid://bkropbwk4b85s" path="res://Scripts/Systems/PipeSystem/PipeConnector/PipeInputConnector.tscn" id="3_i7r71"]
+[ext_resource type="PackedScene" uid="uid://ctfk5lcy6ynxd" path="res://Scripts/Systems/PipeSystem/PipeConnector/PipeOutputConnector.tscn" id="4_6bmrt"]
+[ext_resource type="PackedScene" uid="uid://dq38xh2p1wtxg" path="res://Scripts/WorldResources/LiquidResourceStorage/LiquidResourceStorage.tscn" id="5_7cb1x"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_oqrfg"]
+height = 0.2
+radius = 2.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_d5rs1"]
+top_radius = 2.0
+bottom_radius = 2.0
+height = 10.0
+radial_segments = 26
+rings = 1
+cap_bottom = false
+
+[node name="WaterTank" node_paths=PackedStringArray("MeshInstances") instance=ExtResource("1_8kdgs")]
+MeshInstances = [NodePath("MeshInstance3D")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+shape = SubResource("CylinderShape3D_oqrfg")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+mesh = SubResource("CylinderMesh_d5rs1")
+
+[node name="Label3D" type="Label3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.9481, 0)
+billboard = 1
+text = "sadasdsadsadasdasda"
+font_size = 60
+outline_size = 10
+
+[node name="Label3D2" type="Label3D" parent="." index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.9481, 0)
+billboard = 1
+text = "Water Tank"
+font_size = 60
+outline_size = 10
+
+[node name="PipeInputConnector" parent="." index="4" instance=ExtResource("3_i7r71")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.791682, 0, -2.09734)
+_acceptedResources = Array[Resource]([ExtResource("2_dujo4")])
+FlowRate = 10.0
+
+[node name="PipeOutputConnector" parent="." index="5" instance=ExtResource("4_6bmrt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.792, 0, -2.097)
+_acceptedResources = Array[Resource]([ExtResource("2_dujo4")])
+FlowRate = 10.0
+
+[node name="LiquidResourceStorage" parent="." index="6" node_paths=PackedStringArray("_pipeInputConnectors", "_pipeOutputConnectors") instance=ExtResource("5_7cb1x")]
+_pipeInputConnectors = [NodePath("../PipeInputConnector")]
+_pipeOutputConnectors = [NodePath("../PipeOutputConnector")]
+_resource = ExtResource("2_dujo4")

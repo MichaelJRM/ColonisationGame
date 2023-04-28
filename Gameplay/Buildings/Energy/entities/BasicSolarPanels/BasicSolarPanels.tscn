@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://cfqmr8rrrhufa"]
+
+[ext_resource type="PackedScene" uid="uid://cgalnxwfl3wc" path="res://Gameplay/Buildings/Building.tscn" id="1_swvqi"]
+[ext_resource type="PackedScene" uid="uid://q3c8jwlhh1iu" path="res://Assets/Buildings/Energy/BasicSolarPanels/BasicSolarPanels.blend" id="2_fk6u5"]
+[ext_resource type="PackedScene" uid="uid://skolna7oefs8" path="res://Scripts/Systems/EnergySystem/WireConnector/WireOutputConnector.tscn" id="3_ixcri"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vft7k"]
+size = Vector3(9.917, 0.1, 10.001)
+
+[node name="BasicSolarPanels" instance=ExtResource("1_swvqi")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+shape = SubResource("BoxShape3D_vft7k")
+
+[node name="BasicSolarPanels" parent="." index="1" instance=ExtResource("2_fk6u5")]
+
+[node name="WireOutputConnector" parent="." index="2" instance=ExtResource("3_ixcri")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6799, 2.41968, 4.90008)

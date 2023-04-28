@@ -1,0 +1,39 @@
+[gd_scene load_steps=4 format=3 uid="uid://h081fkxhcsex"]
+
+[ext_resource type="Script" path="res://Scripts/Player/UI/Ui.cs" id="1_3lxb3"]
+[ext_resource type="PackedScene" uid="uid://dxetsh0me4bko" path="res://Scripts/Player/UI/ToolbarItem.tscn" id="3_18n57"]
+[ext_resource type="PackedScene" uid="uid://b3iq1kg4h1xko" path="res://Scripts/Player/UI/ToolbarSubItem.tscn" id="3_g3ov2"]
+
+[node name="UI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_3lxb3")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/margin_bottom = 10
+
+[node name="Toolbar" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Construction" parent="MarginContainer/Toolbar" instance=ExtResource("3_18n57")]
+layout_mode = 2
+_subItemScene = ExtResource("3_g3ov2")
+
+[node name="Energy" parent="MarginContainer/Toolbar" instance=ExtResource("3_18n57")]
+layout_mode = 2
+_subItemScene = ExtResource("3_g3ov2")

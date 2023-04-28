@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://dr1ueqoukcc13"]
+
+[ext_resource type="PackedScene" uid="uid://ca7u6viecffds" path="res://Scripts/Player/Camera/PlayerCamera.tscn" id="1_6jrbj"]
+[ext_resource type="PackedScene" uid="uid://h081fkxhcsex" path="res://Scripts/Player/UI/Ui.tscn" id="2_d3ud0"]
+
+[node name="Player" type="Node3D"]
+
+[node name="PlayerCamera" parent="." instance=ExtResource("1_6jrbj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.999999, 0, 0, 0)
+
+[node name="UI" parent="." instance=ExtResource("2_d3ud0")]

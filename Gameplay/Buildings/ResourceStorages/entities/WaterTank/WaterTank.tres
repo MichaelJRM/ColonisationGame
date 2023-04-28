@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://bhdt5yl5k2rt3"]
+
+[ext_resource type="PackedScene" uid="uid://vlj0hpa7dw7f" path="res://Gameplay/Buildings/ResourceStorages/entities/WaterTank/WaterTank.tscn" id="1_bl52j"]
+[ext_resource type="Script" path="res://Scripts/Systems/BuildingSystem/BuildingResource.cs" id="2_4pmey"]
+
+[resource]
+script = ExtResource("2_4pmey")
+Id = "WaterTank"
+Name = "Water Tank"
+Scene = ExtResource("1_bl52j")

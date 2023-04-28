@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://bispputdqd1iu"]
+
+[ext_resource type="PackedScene" uid="uid://cfqmr8rrrhufa" path="res://Gameplay/Buildings/Energy/entities/BasicSolarPanels/BasicSolarPanels.tscn" id="1_gjq6m"]
+[ext_resource type="Script" path="res://Scripts/Systems/BuildingSystem/BuildingResource.cs" id="2_mnj7o"]
+
+[resource]
+script = ExtResource("2_mnj7o")
+Id = "BasicSolarPanels"
+Name = "Basic Solar Panels"
+Scene = ExtResource("1_gjq6m")

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://tqka17sdqmbl"]
+
+[ext_resource type="Script" path="res://Scripts/WorldResources/ResourceConverter/ResourceConverter.cs" id="1_5a2jh"]
+
+[node name="ResourceConverter" type="Node"]
+script = ExtResource("1_5a2jh")

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bfgbkescrgbas"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/EnergySystem/WireConnector/WireConnector.cs" id="1_ttg7t"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_yirlv"]
+
+[node name="WireConnector" type="Area3D"]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_ttg7t")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_yirlv")

@@ -1,0 +1,47 @@
+[gd_scene load_steps=12 format=3 uid="uid://c8p3o0y7skwap"]
+
+[ext_resource type="PackedScene" uid="uid://cgalnxwfl3wc" path="res://Gameplay/Buildings/Building.tscn" id="1_fsefy"]
+[ext_resource type="PackedScene" uid="uid://25wveu8g7mg2" path="res://scripts/WorldResources/ResourceConverter/ResourceConverter.tscn" id="2_ly3go"]
+[ext_resource type="Resource" uid="uid://ruc2cvunvru4" path="res://Gameplay/Buildings/ResourceConverters/entities/WaterToOxygenConverter/WaterToOxygenConversionData.tres" id="3_r5hxl"]
+[ext_resource type="Resource" uid="uid://cig6dr0p71tl0" path="res://Gameplay/Buildings/ResourceConverters/entities/WaterToOxygenConverter/OxygenStorageStorageData.tres" id="4_rgfpw"]
+[ext_resource type="PackedScene" uid="uid://ctfk5lcy6ynxd" path="res://scripts/systems/PipeSystem/PipeConnector/PipeOutputConnector.tscn" id="4_vshxj"]
+[ext_resource type="Resource" uid="uid://b3nomjajkj585" path="res://Gameplay/WorldResources/entities/OxygenResource.tres" id="5_1ro5s"]
+[ext_resource type="Resource" uid="uid://brgfmegsh61bi" path="res://Gameplay/Buildings/ResourceConverters/entities/WaterToOxygenConverter/WaterStorageStorageData.tres" id="5_s7xvv"]
+[ext_resource type="PackedScene" uid="uid://bkropbwk4b85s" path="res://scripts/systems/PipeSystem/PipeConnector/PipeInputConnector.tscn" id="6_g2pc8"]
+[ext_resource type="Resource" uid="uid://ck3hhrhusu8mr" path="res://Gameplay/WorldResources/entities/WaterResource.tres" id="7_bexu4"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_7nb5d"]
+radius = 3.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_gy302"]
+radius = 3.0
+height = 6.0
+radial_segments = 30
+rings = 26
+
+[node name="WaterToOxygenConverter" node_paths=PackedStringArray("MeshInstances") instance=ExtResource("1_fsefy")]
+MeshInstances = [NodePath("MeshInstance3D")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+shape = SubResource("SphereShape3D_7nb5d")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+mesh = SubResource("SphereMesh_gy302")
+
+[node name="ResourceConverter" parent="." index="2" node_paths=PackedStringArray("_pipeInputConnectors", "_pipeOutputConnectors") instance=ExtResource("2_ly3go")]
+_pipeInputConnectors = [NodePath("../PipeInputConnector")]
+_pipeOutputConnectors = [NodePath("../PipeOutputConnector")]
+_resourceConversionData = [ExtResource("3_r5hxl")]
+_resourceStorageData = [ExtResource("4_rgfpw"), ExtResource("5_s7xvv")]
+
+[node name="PipeOutputConnector" parent="." index="3" instance=ExtResource("4_vshxj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 2)
+_acceptedResources = [ExtResource("5_1ro5s")]
+FlowRate = 10.0
+
+[node name="PipeInputConnector" parent="." index="4" instance=ExtResource("6_g2pc8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 2)
+_acceptedResources = [ExtResource("7_bexu4")]
+FlowRate = 10.0

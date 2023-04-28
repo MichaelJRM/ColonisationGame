@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://bil1h8rl2imoi"]
+
+[ext_resource type="PackedScene" uid="uid://c7wst6r12ypkl" path="res://Gameplay/Buildings/ResourceStorages/entities/OxygenTank/OxygenTank.tscn" id="1_4rtwq"]
+[ext_resource type="Script" path="res://Scripts/Systems/BuildingSystem/BuildingResource.cs" id="2_87jcp"]
+
+[resource]
+script = ExtResource("2_87jcp")
+Id = "OxygenTank"
+Name = "Oxygen Tank"
+Scene = ExtResource("1_4rtwq")

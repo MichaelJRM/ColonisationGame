@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://nj8vif25b80"]
+
+[ext_resource type="PackedScene" uid="uid://cljgng8r3nsc2" path="res://Gameplay/Buildings/ResourceConverters/entities/WaterToOxygenConverter/WaterToOxygenConverter.tscn" id="1_lp1ah"]
+[ext_resource type="Script" path="res://Scripts/Systems/BuildingSystem/BuildingResource.cs" id="2_y21il"]
+
+[resource]
+script = ExtResource("2_y21il")
+Id = "WaterToOxygenConverter"
+Name = "WaterToOxygenConverter"
+Scene = ExtResource("1_lp1ah")

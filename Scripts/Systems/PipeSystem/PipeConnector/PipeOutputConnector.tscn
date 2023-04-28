@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://ctfk5lcy6ynxd"]
+
+[ext_resource type="PackedScene" path="res://Scripts/Systems/PipeSystem/PipeConnector/PipeConnector.tscn" id="1_3qyba"]
+[ext_resource type="Script" path="res://Scripts/Systems/PipeSystem/PipeConnector/PipeOutputConnector.cs" id="2_dhiky"]
+
+[node name="PipeOutputConnector" instance=ExtResource("1_3qyba")]
+script = ExtResource("2_dhiky")

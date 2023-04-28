@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://dxetsh0me4bko"]
+
+[ext_resource type="Texture2D" uid="uid://bwq2i4mdvd2ag" path="res://Scripts/Player/UI/construction-icon.jpg" id="1_xh6se"]
+[ext_resource type="Script" path="res://Scripts/Player/UI/ToolbarItem.cs" id="2_vtkxo"]
+
+[node name="ToolbarItem" type="TextureButton"]
+texture_filter = 2
+custom_minimum_size = Vector2(50, 50)
+texture_normal = ExtResource("1_xh6se")
+ignore_texture_size = true
+stretch_mode = 0
+script = ExtResource("2_vtkxo")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -25.0
+offset_top = -60.0
+offset_right = 25.0
+offset_bottom = -10.0
+grow_horizontal = 2

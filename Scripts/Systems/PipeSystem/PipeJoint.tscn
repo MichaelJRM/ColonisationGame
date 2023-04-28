@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3 uid="uid://mduwhpoxrvev"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/PipeSystem/PipeJoint.cs" id="1_04cna"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_prawg"]
+radius = 0.4
+
+[node name="PipeJoint" type="Area3D"]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_04cna")
+MinDistanceBetweenJoints = 0.61
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_prawg")
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.481114, 0)
+billboard = 1
+font_size = 40
+outline_size = 0
+
+[node name="Label3D2" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.813582, 0)
+billboard = 1
+font_size = 40
+outline_size = 0

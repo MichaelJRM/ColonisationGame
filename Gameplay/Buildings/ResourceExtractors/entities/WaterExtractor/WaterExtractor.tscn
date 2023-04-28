@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3 uid="uid://cg0u7pbmawqai"]
+
+[ext_resource type="PackedScene" uid="uid://cgalnxwfl3wc" path="res://Gameplay/Buildings/Building.tscn" id="1_ql324"]
+[ext_resource type="PackedScene" uid="uid://dv0cu7xt62w80" path="res://Scripts/WorldResources/LiquidResourceExtractor/LiquidResourceExtractor.tscn" id="2_scedc"]
+[ext_resource type="Resource" uid="uid://ck3hhrhusu8mr" path="res://Gameplay/WorldResources/entities/WaterResource.tres" id="4_33wk6"]
+[ext_resource type="PackedScene" uid="uid://ctfk5lcy6ynxd" path="res://Scripts/Systems/PipeSystem/PipeConnector/PipeOutputConnector.tscn" id="5_xf66f"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_it2am"]
+height = 0.2
+radius = 5.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hhvcu"]
+top_radius = 5.0
+bottom_radius = 5.0
+radial_segments = 40
+rings = 1
+cap_bottom = false
+
+[node name="WaterExtractor" node_paths=PackedStringArray("MeshInstances") instance=ExtResource("1_ql324")]
+MeshInstances = [NodePath("MeshInstance3D")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+shape = SubResource("CylinderShape3D_it2am")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CylinderMesh_hhvcu")
+
+[node name="LiquidResourceExtractor" parent="." index="2" node_paths=PackedStringArray("_pipeOutputConnectors") instance=ExtResource("2_scedc")]
+_pipeOutputConnectors = [NodePath("../PipeOutputConnector")]
+_extractionRate = 10.0
+Resource = ExtResource("4_33wk6")
+
+[node name="Label3D" type="Label3D" parent="LiquidResourceExtractor" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.64066, 0)
+billboard = 1
+text = "sdasdsadasdasda"
+font_size = 60
+outline_size = 10
+
+[node name="PipeOutputConnector" parent="." index="3" instance=ExtResource("5_xf66f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5.25538)
+_acceptedResources = Array[Resource]([ExtResource("4_33wk6")])
+FlowRate = 10.0
