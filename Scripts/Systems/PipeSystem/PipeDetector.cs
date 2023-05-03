@@ -8,18 +8,16 @@ namespace BaseBuilding.scripts.systems.PipeSystem;
 
 public partial class PipeDetector : Area3D
 {
-    private Global _global = null!;
     public bool IsAreaValid { get; private set; } = true;
 
     public override void _Ready()
     {
-        _global = GetNode<Global>("/root/Global");
-        GlobalPosition = _global.MousePositionInWorld;
+        GlobalPosition = Global.Instance.GetMousePositionInWorld();
     }
 
     public override void _Process(double delta)
     {
-        GlobalPosition = _global.MousePositionInWorld;
+        GlobalPosition = Global.Instance.GetMousePositionInWorld();
     }
 
     public override void _PhysicsProcess(double delta)

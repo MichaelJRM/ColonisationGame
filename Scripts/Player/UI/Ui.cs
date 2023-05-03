@@ -6,14 +6,12 @@ namespace BaseBuilding.Scripts.Player.UI;
 
 public partial class Ui : Control
 {
-    private BuildingSystem _buildingSystem = null!;
     private ToolbarItem? _currentOpenItem;
 
     public override void _Ready()
     {
-        _buildingSystem = GetNode<BuildingSystem>("/root/BuildingSystem");
-        var buildingDatabase = GetNode<BuildingDataBase>("/root/BuildingDataBase");
         var constructionItem = GetNode<ToolbarItem>("MarginContainer/Toolbar/Construction");
+        var buildingDatabase = BuildingDataBase.Instance;
         constructionItem.Init(
             buildingDatabase.ResourceExtractors.Concat(
                     buildingDatabase.ResourceStorages
@@ -40,6 +38,6 @@ public partial class Ui : Control
 
     private void _onBuildingPressed(object? sender, BuildingResource buildingResource)
     {
-        _buildingSystem.StartBuildingPlacement(buildingResource);
+        BuildingSystem.Instance.StartBuildingPlacement(buildingResource);
     }
 }

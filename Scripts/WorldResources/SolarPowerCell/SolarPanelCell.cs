@@ -16,7 +16,6 @@ public partial class SolarPanelCell : Node
 
     [Export] private WireOutputConnector[] _wireOutputConnectors = Array.Empty<WireOutputConnector>();
 
-    private Global _global = null!;
     private ThrottledGenerator _throttledGenerator = null!;
 
 
@@ -24,8 +23,7 @@ public partial class SolarPanelCell : Node
     {
         var building = GetParent<Building>();
         building.PlacedEvent += _activate;
-        _global = GetNode<Global>("/root/Global");
-        _throttledGenerator = new ThrottledGenerator(_generationRatePerSecond, _global.GameTimeInSeconds);
+        _throttledGenerator = new ThrottledGenerator(_generationRatePerSecond, Global.Instance.GameTimeInSeconds);
     }
 
     private void _activate()
@@ -44,6 +42,6 @@ public partial class SolarPanelCell : Node
 
     private float _onResourceAsked(float amount)
     {
-        return _throttledGenerator.Generate(amount, _global.GameTimeInSeconds);
+        return _throttledGenerator.Generate(amount, Global.Instance.GameTimeInSeconds);
     }
 }

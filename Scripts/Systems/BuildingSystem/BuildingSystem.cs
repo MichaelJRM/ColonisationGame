@@ -2,12 +2,19 @@
 
 namespace BaseBuilding.scripts.systems.BuildingSystem;
 
-public partial class BuildingSystem : Node
+public sealed partial class BuildingSystem : Node
 {
     private BuildingPlacementSystem _placementSystem = new();
 
+    private BuildingSystem()
+    {
+    }
+
+    public static BuildingSystem Instance { get; private set; } = null!;
+
     public override void _Ready()
     {
+        Instance = this;
         AddChild(_placementSystem);
     }
 

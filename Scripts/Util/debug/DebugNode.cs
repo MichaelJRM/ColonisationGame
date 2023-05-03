@@ -7,8 +7,7 @@ public partial class DebugNode : Node3D
 {
     public override void _Ready()
     {
-        var global = GetNode<Global>("/root/Global");
-        if (!global.IsDebugModeEnabled)
+        if (!Global.Instance.IsDebugModeEnabled)
         {
             QueueFree();
         }

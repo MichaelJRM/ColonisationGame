@@ -3,7 +3,7 @@ using Godot;
 
 namespace BaseBuilding.scripts.systems.BuildingSystem;
 
-public partial class BuildingDataBase : Node
+public sealed partial class BuildingDataBase : Node
 {
     private const string ResourceExtractorsPath = "res://Gameplay/Buildings/ResourceExtractors/entities/";
     private const string ResourceStoragesPath = "res://Gameplay/Buildings/ResourceStorages/entities/";
@@ -14,8 +14,15 @@ public partial class BuildingDataBase : Node
     public readonly List<BuildingResource> ResourceExtractors = new();
     public readonly List<BuildingResource> ResourceStorages = new();
 
+    private BuildingDataBase()
+    {
+    }
+
+    public static BuildingDataBase Instance { get; private set; } = null!;
+
     public override void _Ready()
     {
+        Instance = this;
         // Task.Factory.StartNew(_loadAllResources);
         _loadAllResources();
     }

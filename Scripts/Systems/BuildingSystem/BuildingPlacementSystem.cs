@@ -6,7 +6,6 @@ namespace BaseBuilding.scripts.systems.BuildingSystem;
 public partial class BuildingPlacementSystem : Node
 {
     private readonly BaseMaterial3D _placementMaterial = new StandardMaterial3D();
-    private Global _global = null!;
     private Building? _preview;
     private BuildingResource? _resource;
     private StatusEnum _status = StatusEnum.Inactive;
@@ -15,7 +14,6 @@ public partial class BuildingPlacementSystem : Node
     {
         SetProcess(false);
         SetProcessUnhandledInput(false);
-        _global = GetNode<Global>("/root/Global");
         _placementMaterial.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
     }
 
@@ -23,7 +21,7 @@ public partial class BuildingPlacementSystem : Node
     {
         if (_status == StatusEnum.Placing)
         {
-            _preview!.GlobalPosition = _global.MousePositionInWorld;
+            _preview!.GlobalPosition = Global.Instance.GetMousePositionInWorld();
             var isPlacementValid = _preview.IsPlacementValid();
             _placementMaterial.AlbedoColor = isPlacementValid ? new Color(0, 1, 0, 0.5f) : new Color(1, 0, 0, 0.5f);
         }
@@ -66,7 +64,7 @@ public partial class BuildingPlacementSystem : Node
         _preview?.QueueFree();
         _resource = buildingResource;
         _preview = buildingResource.Scene.Instantiate<Building>();
-        _preview.Position = _global.MousePositionInWorld;
+        _preview.Position = Global.Instance.GetMousePositionInWorld();
         foreach (var previewMeshInstance in _preview.MeshInstance3Ds)
             previewMeshInstance.MaterialOverlay = _placementMaterial;
         AddChild(_preview);

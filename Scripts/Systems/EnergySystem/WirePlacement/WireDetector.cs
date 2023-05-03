@@ -8,8 +8,6 @@ namespace BaseBuilding.Scripts.Systems.EnergySystem.WirePlacement;
 
 public partial class WireDetector : Area3D
 {
-    private Global _global = null!;
-
     public override void _Ready()
     {
         SetCollisionLayerValue(1, false);
@@ -22,13 +20,12 @@ public partial class WireDetector : Area3D
         shape.Radius = 0.2f;
         collisionShape.Shape = shape;
         AddChild(collisionShape);
-        _global = GetNode<Global>("/root/Global");
-        GlobalPosition = _global.MousePositionInWorld;
+        GlobalPosition = Global.Instance.GetMousePositionInWorld();
     }
 
     public override void _Process(double delta)
     {
-        GlobalPosition = _global.MousePositionInWorld;
+        GlobalPosition = Global.Instance.GetMousePositionInWorld();
     }
 
     public WireJoint? GetClosestDetectedWireJoint()
