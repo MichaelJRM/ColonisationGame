@@ -19,4 +19,6 @@ Global
 		{6428229F-8B33-4816-99CA-C6598E7BEE01}.Profile|Any CPU.ActiveCfg = Profile|Any CPU
 		{6428229F-8B33-4816-99CA-C6598E7BEE01}.Profile|Any CPU.Build.0 = Profile|Any CPU
 	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
 EndGlobal

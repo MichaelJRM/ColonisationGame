@@ -20,13 +20,13 @@ public partial class Ui : Control
                 )
                 .Concat(
                     buildingDatabase.ResourceConverters
-                ).ToList());
+                ).ToArray());
         constructionItem.Toggle += _onItemPressed;
         constructionItem.BuildingPressed += _onBuildingPressed;
 
 
         var energyItem = GetNode<ToolbarItem>("MarginContainer/Toolbar/Energy");
-        energyItem.Init(buildingDatabase.Energy);
+        energyItem.Init(buildingDatabase.Energy.ToArray());
         energyItem.Toggle += _onItemPressed;
         energyItem.BuildingPressed += _onBuildingPressed;
     }

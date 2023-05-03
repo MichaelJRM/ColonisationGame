@@ -20,14 +20,13 @@ ao_texture = ExtResource("4_sd3mn")
 uv1_triplanar = true
 texture_filter = 5
 
-[node name="TemporaryPipe" node_paths=PackedStringArray("MeshInstance3D", "CollisionShape") instance=ExtResource("1_gxwkp")]
+[node name="TemporaryPipe" node_paths=PackedStringArray("MeshInstance3D") instance=ExtResource("1_gxwkp")]
 collision_layer = 0
 collision_mask = 3
 monitoring = true
 monitorable = false
 script = ExtResource("2_xa7sn")
 MeshInstance3D = NodePath("MeshInstance3D")
-CollisionShape = NodePath("CollisionShape3D")
 Material = SubResource("StandardMaterial3D_vpgtb")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="1"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="0"]

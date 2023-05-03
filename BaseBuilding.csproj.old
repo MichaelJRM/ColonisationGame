@@ -1,0 +1,14 @@
+<Project Sdk="Godot.NET.Sdk/4.0.2">
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+      <Content Include="Resources\Buildings\Building.tscn" />
+      <Content Include="Resources\Buildings\entities\WaterExtractor\WaterExtractor.tres" />
+      <Content Include="Resources\Buildings\entities\WaterExtractor\WaterExtractor.tscn" />
+      <Content Include="Resources\Buildings\entities\WaterTank\WaterTank.tres" />
+      <Content Include="Resources\Buildings\entities\WaterTank\WaterTank.tscn" />
+    </ItemGroup>
+</Project>

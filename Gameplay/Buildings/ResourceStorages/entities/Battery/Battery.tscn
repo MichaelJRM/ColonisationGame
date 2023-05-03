@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3 uid="uid://8h6yw35g2bmp"]
+
+[ext_resource type="PackedScene" uid="uid://cgalnxwfl3wc" path="res://Gameplay/Buildings/Building.tscn" id="1_c1i4l"]
+[ext_resource type="PackedScene" uid="uid://bsrcm2oofoco" path="res://Assets/EnergySystem/Batteries/Battery.blend" id="2_6ckft"]
+[ext_resource type="Resource" uid="uid://c4xlcxt1r6fuv" path="res://Gameplay/WorldResources/entities/Energy.tres" id="4_sv5t2"]
+[ext_resource type="PackedScene" uid="uid://b6ougwjfav1vx" path="res://Scripts/Systems/EnergySystem/Wire/WireInputOutputConnector.tscn" id="5_tipus"]
+[ext_resource type="PackedScene" uid="uid://dqv41ih11ubb" path="res://Scripts/WorldResources/EnergyResourceStorage/EnergyResourceStorage.tscn" id="6_a7tao"]
+[ext_resource type="PackedScene" uid="uid://cgnww4uwouh1m" path="res://Scripts/Util/debug/DebugNode.tscn" id="7_gebkx"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fl1m8"]
+size = Vector3(3.398, 0.2, 9)
+
+[node name="Battery" node_paths=PackedStringArray("MeshInstance3Ds") instance=ExtResource("1_c1i4l")]
+MeshInstance3Ds = [NodePath("Battery/Battery")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+shape = SubResource("BoxShape3D_fl1m8")
+
+[node name="Battery" parent="." index="1" instance=ExtResource("2_6ckft")]
+
+[node name="EnergyResourceStorage" parent="." index="2" node_paths=PackedStringArray("_wireInputOutputConnectors", "_debugStorageLabel") instance=ExtResource("6_a7tao")]
+_wireInputOutputConnectors = [NodePath("../WireInputOutputConnector")]
+_debugStorageLabel = NodePath("../DebugNode/Label3D")
+
+[node name="DebugNode" parent="." index="3" instance=ExtResource("7_gebkx")]
+
+[node name="Label3D" type="Label3D" parent="DebugNode" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7534, 0)
+billboard = 1
+text = "Storage
+"
+font_size = 40
+outline_size = 5
+
+[node name="WireInputOutputConnector" parent="." index="4" instance=ExtResource("5_tipus")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.46835, 0, 4.29929)
+_acceptedResources = Array[Resource]([ExtResource("4_sv5t2")])
+FlowRate = 10.0
+
+[node name="WireOrigin" parent="WireInputOutputConnector" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.90269, 0)
+
+[node name="LineId" parent="WireInputOutputConnector/DebugNode" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.28168, 0)
+
+[editable path="Battery"]
+[editable path="WireInputOutputConnector"]

@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://bkropbwk4b85s" path="res://Scripts/Systems/PipeSystem/PipeConnector/PipeInputConnector.tscn" id="2_p4len"]
 [ext_resource type="Resource" uid="uid://b3nomjajkj585" path="res://Gameplay/WorldResources/entities/OxygenResource.tres" id="3_xn08d"]
 [ext_resource type="PackedScene" uid="uid://ctfk5lcy6ynxd" path="res://Scripts/Systems/PipeSystem/PipeConnector/PipeOutputConnector.tscn" id="4_qib0a"]
-[ext_resource type="PackedScene" uid="uid://dq38xh2p1wtxg" path="res://Scripts/WorldResources/LiquidResourceStorage/LiquidResourceStorage.tscn" id="5_jsixm"]
+[ext_resource type="PackedScene" uid="uid://dpbk26bqj7o82" path="res://Scripts/WorldResources/LiquidResourceStorage/LiquidResourceStorage.tscn" id="5_jsixm"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_k8h5l"]
 height = 0.2
@@ -18,8 +18,8 @@ radial_segments = 26
 rings = 1
 cap_bottom = false
 
-[node name="OxygenTank" node_paths=PackedStringArray("MeshInstances") instance=ExtResource("1_cvrkp")]
-MeshInstances = [NodePath("MeshInstance3D")]
+[node name="OxygenTank" node_paths=PackedStringArray("MeshInstance3Ds") instance=ExtResource("1_cvrkp")]
+MeshInstance3Ds = [NodePath("MeshInstance3D")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)

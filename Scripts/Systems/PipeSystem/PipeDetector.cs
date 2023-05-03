@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BaseBuilding.scripts.singletons;
+using BaseBuilding.scripts.util.common;
 using Godot;
 
 namespace BaseBuilding.scripts.systems.PipeSystem;
@@ -23,45 +24,31 @@ public partial class PipeDetector : Area3D
 
     public override void _PhysicsProcess(double delta)
     {
-        var overlappingAreas = GetOverlappingAreas();
-        IsAreaValid = overlappingAreas.Count == 0 ||
-                      overlappingAreas.All(overlappingArea => overlappingArea is PipeJoint or Pipe);
+        IsAreaValid = (
+            !HasOverlappingAreas()
+            || GetOverlappingAreas().All(e => e.GetType() == typeof(PipeJoint) || e.GetType() == typeof(Pipe))
+        );
     }
 
     public PipeJoint? GetClosestDetectedPipeJoint()
     {
-        var overlappingAreas = GetOverlappingAreas();
-        var detectedPipeJoints = new List<PipeJoint>(overlappingAreas.Count);
-        foreach (var overlappingArea in overlappingAreas)
-            if (overlappingArea is PipeJoint pipeJoint)
-                detectedPipeJoints.Add(pipeJoint);
-        return _FindClosestNode(detectedPipeJoints);
+        if (!HasOverlappingAreas()) return null;
+        var detectedPipeJoints = GetOverlappingAreas()
+            .Where(e => e.GetType() == typeof(PipeJoint))
+            .Select(e => (PipeJoint)e)
+            .ToArray();
+
+        return NodeUtil.FindClosestNode(GlobalPosition, detectedPipeJoints);
     }
 
     public Pipe? GetClosestDetectedPipe()
     {
-        var overlappingAreas = GetOverlappingAreas();
-        var detectedPipes = new List<Pipe>(overlappingAreas.Count);
-        foreach (var overlappingArea in overlappingAreas)
-            if (overlappingArea is Pipe pipe and not TemporaryPipe)
-                detectedPipes.Add(pipe);
-        return _FindClosestNode(detectedPipes);
-    }
+        if (!HasOverlappingAreas()) return null;
+        var detectedPipes = GetOverlappingAreas()
+            .Where(e => e.GetType() == typeof(Pipe))
+            .Select(e => (Pipe)e)
+            .ToArray();
 
-    private T? _FindClosestNode<T>(List<T> nodes) where T : Node3D
-    {
-        T? closestNode = null;
-        var closestDistance = float.MaxValue;
-        foreach (var node in nodes)
-        {
-            var distance = GlobalPosition.DistanceSquaredTo(node.GlobalPosition);
-            if (distance < closestDistance)
-            {
-                closestDistance = distance;
-                closestNode = node;
-            }
-        }
-
-        return closestNode;
+        return NodeUtil.FindClosestNode(GlobalPosition, detectedPipes);
     }
 }

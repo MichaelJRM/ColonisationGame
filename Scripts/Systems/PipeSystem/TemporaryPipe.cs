@@ -6,8 +6,8 @@ public partial class TemporaryPipe : Pipe
 {
     [Export] public MeshInstance3D MeshInstance3D { get; private set; } = null!;
 
-    public void CreateAndAssignMesh(float? size = null)
+    public void CreateAndAssignMesh(float size)
     {
-        MeshInstance3D.Mesh = CreateMesh(size);
+        MeshInstance3D.Mesh = CreateMesh(false, size);
     }
 }

@@ -3,26 +3,26 @@ using System.Linq;
 using BaseBuilding.scripts.util.common;
 using Godot;
 
-namespace BaseBuilding.scripts.systems.PipeSystem;
+namespace BaseBuilding.Scripts.Systems;
 
-public partial class PipeLineRenderer : RefCounted
+public class ResourceLineRenderer
 {
-    private const float MultiMeshMaxRenderingRadius = 200.0f;
-    private readonly Dictionary<int, RenderInstance> _jointRenderInstances = new();
-    private readonly Dictionary<int, RenderInstance> _pipeRenderInstances = new();
-    private int _jointRenderInstanceIdCounter;
-    private int _pipeRenderInstanceIdCounter;
+    private const float MaxClusterRadius = 200.0f;
+    private readonly Dictionary<uint, RenderInstance> _jointRenderInstances = new();
+    private readonly Dictionary<uint, RenderInstance> _limbRenderInstances = new();
+    private uint _jointRenderInstanceIdCounter;
+    private uint _limbRenderInstanceIdCounter;
 
-    public int AddPipe(World3D world, Mesh mesh, Transform3D globalTransform)
+    public uint AddLimb(World3D world, Mesh mesh, Transform3D globalTransform)
     {
-        var renderInstance = _findCloseByPipeRenderInstance(mesh, globalTransform);
-        int instanceId;
+        var renderInstance = _findCloseByLimbRenderInstance(mesh, globalTransform);
+        uint instanceId;
         if (renderInstance == null)
         {
-            instanceId = _pipeRenderInstanceIdCounter;
-            _pipeRenderInstanceIdCounter++;
+            instanceId = _limbRenderInstanceIdCounter;
+            _limbRenderInstanceIdCounter++;
             renderInstance = _createRenderInstance(instanceId, world, mesh, globalTransform);
-            _pipeRenderInstances[instanceId] = renderInstance;
+            _limbRenderInstances[instanceId] = renderInstance;
         }
         else
         {
@@ -33,18 +33,16 @@ public partial class PipeLineRenderer : RefCounted
         return instanceId;
     }
 
-    public void RemovePipe(int renderInstanceId, Transform3D transform3D)
+    public void RemoveLimb(uint renderInstanceId, Transform3D transform3D)
     {
-        var renderInstance = _pipeRenderInstances[renderInstanceId];
+        var renderInstance = _limbRenderInstances[renderInstanceId];
         renderInstance.RemoveChildInstance(transform3D);
     }
 
-    public int AddJoint(World3D world, Mesh mesh, Transform3D globalTransform)
+    public uint AddJoint(World3D world, Mesh mesh, Transform3D globalTransform)
     {
-        var renderInstance = _jointRenderInstances.FirstOrDefault(
-            e => e.Value.GlobalTransform.Origin.DistanceTo(globalTransform.Origin) < MultiMeshMaxRenderingRadius
-        ).Value;
-        int instanceId;
+        var renderInstance = _jointRenderInstances.FirstOrDefault(InstanceInRange).Value;
+        uint instanceId;
         if (renderInstance == null)
         {
             instanceId = _jointRenderInstanceIdCounter;
@@ -59,22 +57,26 @@ public partial class PipeLineRenderer : RefCounted
         }
 
         return instanceId;
+
+        bool InstanceInRange(KeyValuePair<uint, RenderInstance> kv)
+        {
+            return kv.Value.GlobalTransform.Origin.DistanceTo(globalTransform.Origin) < MaxClusterRadius;
+        }
     }
 
-    private RenderInstance? _findCloseByPipeRenderInstance(Mesh mesh, Transform3D globalTransform)
+    private RenderInstance? _findCloseByLimbRenderInstance(Mesh mesh, Transform3D globalTransform)
     {
-        foreach (var (_, value) in _pipeRenderInstances)
+        foreach (var (_, value) in _limbRenderInstances)
         {
             var isSameMesh = Mathf.IsEqualApprox(value.Mesh.GetAabb().Size.Z, mesh.GetAabb().Size.Z);
-            var isCloseEnough = value.GlobalTransform.Origin.DistanceTo(globalTransform.Origin) <
-                                MultiMeshMaxRenderingRadius;
+            var isCloseEnough = value.GlobalTransform.Origin.DistanceTo(globalTransform.Origin) < MaxClusterRadius;
             if (isSameMesh && isCloseEnough) return value;
         }
 
         return default;
     }
 
-    private RenderInstance _createRenderInstance(int id, World3D world, Mesh mesh, Transform3D globalTransform)
+    private RenderInstance _createRenderInstance(uint id, World3D world, Mesh mesh, Transform3D globalTransform)
     {
         var multiMesh = RenderingServer.MultimeshCreate();
         RenderingServer.MultimeshAllocateData(multiMesh, 1, RenderingServer.MultimeshTransformFormat.Transform3D);
@@ -91,17 +93,19 @@ public partial class PipeLineRenderer : RefCounted
 
     public void Clean()
     {
-        foreach (var (_, value) in _pipeRenderInstances) value.Clean();
-        _pipeRenderInstances.Clear();
+        foreach (var (_, value) in _jointRenderInstances) value.Clean();
+        _jointRenderInstances.Clear();
+        foreach (var (_, value) in _limbRenderInstances) value.Clean();
+        _limbRenderInstances.Clear();
     }
 
     private class RenderInstance
     {
         private readonly List<Transform3D> _transforms = new();
 
-        public readonly int Id;
+        public readonly uint Id;
 
-        public RenderInstance(int id, Mesh mesh, Transform3D globalTransform, Rid multiMesh, Rid instance)
+        public RenderInstance(uint id, Mesh mesh, in Transform3D globalTransform, Rid multiMesh, Rid instance)
         {
             Id = id;
             Mesh = mesh;
@@ -136,7 +140,6 @@ public partial class PipeLineRenderer : RefCounted
                 InstanceCount,
                 RenderingServer.MultimeshTransformFormat.Transform3D
             );
-
             for (var i = 0; i < _transforms.Count; i++)
                 RenderingServer.MultimeshInstanceSetTransform(MultiMesh, i, _transforms[i]);
         }

@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://cy1hvgh7h5nj6"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/EnergySystem/TemporaryWireJoint.cs" id="1_jmxhq"]
+[ext_resource type="PackedScene" uid="uid://1hl04gas5bnf" path="res://Scripts/Systems/EnergySystem/WireJoint.tscn" id="1_qrjdr"]
+
+[node name="TemporaryWireJoint" instance=ExtResource("1_qrjdr")]
+collision_layer = 0
+monitorable = false
+script = ExtResource("1_jmxhq")

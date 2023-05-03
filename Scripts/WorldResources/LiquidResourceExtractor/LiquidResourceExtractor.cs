@@ -10,7 +10,7 @@ namespace BaseBuilding.Scripts.WorldResources.LiquidResourceExtractor;
 
 public partial class LiquidResourceExtractor : ResourceExtractor
 {
-    [Export] private Array<PipeOutputConnector> _pipeOutputConnectors = new();
+    [Export] private PipeOutputConnector[] _pipeOutputConnectors = System.Array.Empty<PipeOutputConnector>();
     private Area3D _resourceDetector = null!;
 
     public override void _Ready()
@@ -19,7 +19,7 @@ public partial class LiquidResourceExtractor : ResourceExtractor
         _spawnResourceDepositDetector();
         var building = GetParent<Building>();
         building.PlacedEvent += _activate;
-        building.PlacementValidCallbacks.Add(_doesHaveRequiredResource);
+        building.IsPlacementValidCallbacks.Add(_doesHaveRequiredResource);
     }
 
     private void _spawnResourceDepositDetector()
@@ -44,7 +44,11 @@ public partial class LiquidResourceExtractor : ResourceExtractor
 
     private void _activatePipeConnectors()
     {
-        foreach (var pipeConnector in _pipeOutputConnectors) pipeConnector.Activate(_onResourceAsked);
+        foreach (var pipeConnector in _pipeOutputConnectors)
+        {
+            pipeConnector.BindOnResourceAsked(_onResourceAsked);
+            pipeConnector.Activate();
+        }
     }
 
     private float _onResourceAsked(float amount)

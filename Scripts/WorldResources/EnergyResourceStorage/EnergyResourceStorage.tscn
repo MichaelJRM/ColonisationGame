@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://dqv41ih11ubb"]
+
+[ext_resource type="Script" path="res://Scripts/WorldResources/EnergyResourceStorage/EnergyResourceStorage.cs" id="1_xbnqu"]
+[ext_resource type="Resource" uid="uid://c4xlcxt1r6fuv" path="res://Gameplay/WorldResources/entities/Energy.tres" id="2_irtbi"]
+
+[node name="EnergyResourceStorage" type="Node"]
+script = ExtResource("1_xbnqu")
+_resource = ExtResource("2_irtbi")

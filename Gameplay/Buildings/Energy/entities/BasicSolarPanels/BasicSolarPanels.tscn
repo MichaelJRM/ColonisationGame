@@ -1,13 +1,16 @@
-[gd_scene load_steps=5 format=3 uid="uid://cfqmr8rrrhufa"]
+[gd_scene load_steps=7 format=3 uid="uid://c3qulku82i36d"]
 
 [ext_resource type="PackedScene" uid="uid://cgalnxwfl3wc" path="res://Gameplay/Buildings/Building.tscn" id="1_swvqi"]
 [ext_resource type="PackedScene" uid="uid://q3c8jwlhh1iu" path="res://Assets/Buildings/Energy/BasicSolarPanels/BasicSolarPanels.blend" id="2_fk6u5"]
-[ext_resource type="PackedScene" uid="uid://skolna7oefs8" path="res://Scripts/Systems/EnergySystem/WireConnector/WireOutputConnector.tscn" id="3_ixcri"]
+[ext_resource type="PackedScene" uid="uid://dtv53gugd27c2" path="res://Scripts/Systems/EnergySystem/Wire/WireOutputConnector.tscn" id="4_io3h1"]
+[ext_resource type="Resource" uid="uid://c4xlcxt1r6fuv" path="res://Gameplay/WorldResources/entities/Energy.tres" id="4_w5clt"]
+[ext_resource type="PackedScene" uid="uid://csk0fr7dyjay4" path="res://Scripts/WorldResources/SolarPowerCell/SolarPowerCell.tscn" id="4_y5mof"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vft7k"]
 size = Vector3(9.917, 0.1, 10.001)
 
-[node name="BasicSolarPanels" instance=ExtResource("1_swvqi")]
+[node name="BasicSolarPanels" node_paths=PackedStringArray("MeshInstance3Ds") instance=ExtResource("1_swvqi")]
+MeshInstance3Ds = [NodePath("BasicSolarPanels/BasicSolarPanels")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
@@ -15,5 +18,20 @@ shape = SubResource("BoxShape3D_vft7k")
 
 [node name="BasicSolarPanels" parent="." index="1" instance=ExtResource("2_fk6u5")]
 
-[node name="WireOutputConnector" parent="." index="2" instance=ExtResource("3_ixcri")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6799, 2.41968, 4.90008)
+[node name="SolarPowerCell" parent="." index="2" node_paths=PackedStringArray("_wireOutputConnectors") instance=ExtResource("4_y5mof")]
+_generationRatePerSecond = 10.0
+_wireOutputConnectors = [NodePath("../WireOutputConnector")]
+
+[node name="WireOutputConnector" parent="." index="3" instance=ExtResource("4_io3h1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.67791, 0, 4.90193)
+_acceptedResources = Array[Resource]([ExtResource("4_w5clt")])
+FlowRate = 10.0
+
+[node name="WireOrigin" parent="WireOutputConnector" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.43631, 0)
+
+[node name="LineId" parent="WireOutputConnector/DebugNode" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.73294, 0)
+
+[editable path="BasicSolarPanels"]
+[editable path="WireOutputConnector"]

@@ -20,7 +20,7 @@ public partial class ToolbarItem : TextureButton
         Pressed += _onPressed;
     }
 
-    public void Init(List<BuildingResource> resources)
+    public void Init(BuildingResource[] resources)
     {
         foreach (var resource in resources)
         {

@@ -24,13 +24,5 @@ collision_layer = 3
 collision_mask = 0
 monitoring = false
 script = ExtResource("1_wmqta")
-_meshVertices = PackedVector2Array(-0.245, -0.049, -0.25, 0, -0.245, 0.049, -0.231, 0.096, -0.208, 0.139, -0.177, 0.177, -0.139, 0.208, -0.096, 0.231, -0.049, 0.245, 0, 0.25, 0.049, 0.245, 0.096, 0.231, 0.139, 0.208, 0.177, 0.177, 0.208, 0.139, 0.231, 0.096, 0.245, 0.049, 0.25, 0, 0.245, -0.049)
+_meshShape = PackedVector2Array(-0.231, -0.096, -0.25, 0, -0.231, 0.096, -0.177, 0.177, -0.096, 0.231, 0, 0.25, 0.096, 0.231, 0.177, 0.177, 0.231, 0.096, 0.25, 0, 0.231, -0.096)
 Material = SubResource("StandardMaterial3D_dpcqb")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-
-[node name="Label3D" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-billboard = 1
-font_size = 40
-outline_size = 10

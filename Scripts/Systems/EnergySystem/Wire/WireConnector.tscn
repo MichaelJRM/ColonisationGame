@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3 uid="uid://dih4m6y08keoe"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/EnergySystem/Wire/WireConnector.cs" id="1_ttg7t"]
+[ext_resource type="PackedScene" uid="uid://cgnww4uwouh1m" path="res://Scripts/Util/debug/DebugNode.tscn" id="2_q3iex"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_yirlv"]
+radius = 1.0
+
+[node name="WireConnector" type="Area3D" node_paths=PackedStringArray("_debugLineIdLabel", "WireOrigin")]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_ttg7t")
+_debugLineIdLabel = NodePath("DebugNode/LineId")
+WireOrigin = NodePath("WireOrigin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_yirlv")
+
+[node name="WireOrigin" type="Marker3D" parent="."]
+
+[node name="DebugNode" parent="." instance=ExtResource("2_q3iex")]
+
+[node name="LineId" type="Label3D" parent="DebugNode"]
+billboard = 1
+text = "LineID"
+font_size = 40
+outline_size = 5

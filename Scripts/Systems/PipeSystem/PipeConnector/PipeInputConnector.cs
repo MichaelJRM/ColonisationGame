@@ -1,15 +1,15 @@
 ﻿using System;
 using BaseBuilding.Scripts.WorldResources;
-using Godot;
 
 namespace BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 
-public partial class PipeInputConnector : PipeConnector
+public partial class PipeInputConnector : PipeConnector, IResourceInputConnector
 {
-    public override void _Ready()
+    private OnResourceRequestedCallback? _onResourceRequestedCallback;
+
+    public void BindOnResourceRequested(OnResourceRequestedCallback onResourceRequestedCallback)
     {
-        base._Ready();
-        GetNode<Label3D>("Label3D").Text = "Input";
+        _onResourceRequestedCallback = onResourceRequestedCallback;
     }
 
     public float RequestResource(WorldResource resource)
@@ -19,6 +19,6 @@ public partial class PipeInputConnector : PipeConnector
             throw new Exception(
                 $"Connector {Name} requested resource {resource.Name} which it does not accept"
             );
-        return ResourceRequestedCallback.Invoke(resource, FlowRate, this);
+        return _onResourceRequestedCallback!.Invoke(resource, FlowRate, this);
     }
 }

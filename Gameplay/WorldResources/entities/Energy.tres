@@ -1,0 +1,8 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://c4xlcxt1r6fuv"]
+
+[ext_resource type="Script" path="res://Scripts/WorldResources/WorldResource.cs" id="1_lfemq"]
+
+[resource]
+script = ExtResource("1_lfemq")
+Id = "Energy"
+Name = "Energy"

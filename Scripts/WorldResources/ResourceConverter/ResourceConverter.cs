@@ -1,10 +1,9 @@
-﻿using System.Collections.Immutable;
+﻿using System;
 using System.Linq;
 using BaseBuilding.scripts.common;
 using BaseBuilding.scripts.systems.BuildingSystem;
 using BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 using Godot;
-using Godot.Collections;
 
 namespace BaseBuilding.Scripts.WorldResources.ResourceConverter;
 
@@ -16,12 +15,12 @@ public partial class ResourceConverter : Node
     private readonly TickComponent _inputTick = new();
     private readonly System.Collections.Generic.Dictionary<string, float> _outputResourceStorageAmount = new();
     private readonly System.Collections.Generic.Dictionary<string, float> _outputResourceStorageCapacity = new();
-    [Export] private float _conversionRate = 1f;
-    [Export] private float _inputRate = 1f;
-    [Export] private Array<PipeInputConnector> _pipeInputConnectors = new();
-    [Export] private Array<PipeOutputConnector> _pipeOutputConnectors = new();
-    [Export] private Array<ResourceConversionData> _resourceConversionData = new();
-    [Export] private Array<ResourceStorageData> _resourceStorageData = new();
+    [Export] private int _conversionRate = 1;
+    [Export] private int _inputRate = 1;
+    [Export] private PipeInputConnector[] _pipeInputConnectors = Array.Empty<PipeInputConnector>();
+    [Export] private PipeOutputConnector[] _pipeOutputConnectors = Array.Empty<PipeOutputConnector>();
+    [Export] private ResourceConversionData[] _resourceConversionData = Array.Empty<ResourceConversionData>();
+    [Export] private ResourceStorageData[] _resourceStorageData = Array.Empty<ResourceStorageData>();
 
 
     public override void _Ready()
@@ -55,17 +54,24 @@ public partial class ResourceConverter : Node
     {
         foreach (var pipeInputConnector in _pipeInputConnectors) pipeInputConnector.Activate();
         foreach (var conversionData in _resourceConversionData)
-        foreach (var connector in _pipeOutputConnectors)
-            if (connector.AcceptsResource(conversionData.OutputResource))
-                connector.Activate(amount => _take(amount, conversionData.OutputResource));
+        {
+            foreach (var connector in _pipeOutputConnectors)
+            {
+                if (connector.AcceptsResource(conversionData.OutputResource))
+                {
+                    connector.BindOnResourceAsked(amount => _take(amount, conversionData.OutputResource));
+                    connector.Activate();
+                }
+            }
+        }
     }
 
     private void _initTickComponents()
     {
-        _inputTick.SetTickRate(_inputRate);
+        _inputTick.SetTickRateInFps(_inputRate);
         _inputTick.SetOnTick(_handleResourceInput);
         AddChild(_inputTick);
-        _conversionTick.SetTickRate(_conversionRate);
+        _conversionTick.SetTickRateInFps(_conversionRate);
         _conversionTick.SetOnTick(_handleResourceConversion);
         AddChild(_conversionTick);
     }
@@ -96,15 +102,13 @@ public partial class ResourceConverter : Node
             var storageAmount = _inputResourceStorageAmount[conversionData.InputResource.Id];
             var capacityAmount = _inputResourceStorageCapacity[conversionData.InputResource.Id];
             if (storageAmount >= capacityAmount) continue;
-
-            _pipeInputConnectors
-                .Where(e =>
-                    e.IsConnectedToOtherJoints()
-                    && e.AcceptsResource(conversionData.InputResource)
-                ).ToImmutableList(
-                ).ForEach(e =>
-                    _add(e.RequestResource(conversionData.InputResource), conversionData.InputResource)
-                );
+            foreach (var connector in _pipeInputConnectors)
+            {
+                if (connector.IsConnectedToLine() && connector.AcceptsResource(conversionData.InputResource))
+                {
+                    _add(connector.RequestResource(conversionData.InputResource), conversionData.InputResource);
+                }
+            }
         }
     }
 

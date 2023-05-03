@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Godot;
 
 namespace BaseBuilding.scripts.common;
@@ -10,13 +12,33 @@ public partial class TickComponent : Node
     private double _timeSinceLastTick;
 
 
-    /// <summary>
-    ///     The higher the tick rate, the more often the tick will occur.
-    /// </summary>
-    /// <param name="tickRate"></param>
-    public void SetTickRate(float tickRate)
+    public void Pause()
     {
-        _tickRate = 1f / tickRate;
+        SetProcess(false);
+    }
+
+    public void Resume()
+    {
+        SetProcess(true);
+    }
+
+
+    /// <summary>
+    /// The lower the tickRateInSeconds, the more often the tick will occur.
+    /// </summary>
+    /// <param name="tickRateInSeconds"></param>
+    public void SetTickRateInSeconds(float tickRateInSeconds)
+    {
+        _tickRate = tickRateInSeconds;
+    }
+
+    /// <summary>
+    /// The tick rate in frames per second.
+    /// </summary>
+    /// <param name="fps"></param>
+    public void SetTickRateInFps(int fps)
+    {
+        _tickRate = 1f / fps;
     }
 
     public void SetOnTick(Action onTick)
@@ -34,6 +56,7 @@ public partial class TickComponent : Node
         _timeSinceLastTick += delta;
         if (_timeSinceLastTick < _tickRate) return;
         _timeSinceLastTick = 0;
+
         _onTick();
     }
 }

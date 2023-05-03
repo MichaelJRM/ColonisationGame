@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://dtv53gugd27c2"]
+
+[ext_resource type="PackedScene" uid="uid://dih4m6y08keoe" path="res://Scripts/Systems/EnergySystem/Wire/WireConnector.tscn" id="1_emi6q"]
+[ext_resource type="Script" path="res://Scripts/Systems/EnergySystem/Wire/WireOutputConnector.cs" id="2_bn6rt"]
+
+[node name="WireOutputConnector" instance=ExtResource("1_emi6q")]
+script = ExtResource("2_bn6rt")

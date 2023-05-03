@@ -7,7 +7,7 @@ public static class MathUtil
 {
     public static Vector3 GetParallelPosition(Transform3D targetTransform, Vector3 sourcePosition)
     {
-        var direction = sourcePosition - targetTransform.Origin;
+        var direction = sourcePosition.DirectionTo(targetTransform.Origin);
         var parallelVector = direction.Project(-targetTransform.Basis.Z);
         var parallelPosition = targetTransform.Origin + parallelVector;
         return parallelPosition;
@@ -23,7 +23,7 @@ public static class MathUtil
         return transformA.Origin + transformA.ForwardVector() * s;
     }
 
-    public static float GetAngleBetweenVector2(Vector2 a, Vector2 b, Vector2 c)
+    public static float GetAngleBetweenVector2(in Vector2 a, in Vector2 b, in Vector2 c)
     {
         var ba = (a - b).Normalized();
         var bc = (c - b).Normalized();

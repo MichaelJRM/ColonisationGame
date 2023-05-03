@@ -1,13 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://chbj4yy5tmshj"]
 
-[ext_resource type="PackedScene" uid="uid://mduwhpoxrvev" path="res://scripts/Systems/PipeSystem/PipeJoint.tscn" id="1_1xnv4"]
+[ext_resource type="PackedScene" uid="uid://mduwhpoxrvev" path="res://Scripts/Systems/PipeSystem/PipeJoint.tscn" id="1_1xnv4"]
 [ext_resource type="Script" path="res://Scripts/Systems/PipeSystem/TemporaryPipeJoint.cs" id="2_6c44j"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_7tcyv"]
-top_radius = 0.3
-bottom_radius = 0.3
-height = 0.25
-cap_bottom = false
+[ext_resource type="PackedScene" uid="uid://6g88842v5hn" path="res://Assets/PipeSystem/PipeJoint/PipeJoint.blend" id="3_ra5jw"]
 
 [node name="TemporaryPipeJoint" instance=ExtResource("1_1xnv4")]
 collision_layer = 0
@@ -16,6 +11,4 @@ monitoring = true
 monitorable = false
 script = ExtResource("2_6c44j")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.125, 0)
-mesh = SubResource("CylinderMesh_7tcyv")
+[node name="PipeJoint" parent="." index="1" instance=ExtResource("3_ra5jw")]

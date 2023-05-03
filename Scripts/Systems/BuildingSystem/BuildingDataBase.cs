@@ -16,6 +16,12 @@ public partial class BuildingDataBase : Node
 
     public override void _Ready()
     {
+        // Task.Factory.StartNew(_loadAllResources);
+        _loadAllResources();
+    }
+
+    private void _loadAllResources()
+    {
         _loadResources(ResourceExtractorsPath, ResourceExtractors);
         _loadResources(ResourceStoragesPath, ResourceStorages);
         _loadResources(ResourceConvertersPath, ResourceConverters);

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://by86pmpl7gmtb"]
+
+[ext_resource type="PackedScene" uid="uid://8h6yw35g2bmp" path="res://Gameplay/Buildings/ResourceStorages/entities/Battery/Battery.tscn" id="1_7typl"]
+[ext_resource type="Script" path="res://Scripts/Systems/BuildingSystem/BuildingResource.cs" id="2_0a0xg"]
+
+[resource]
+script = ExtResource("2_0a0xg")
+Id = "Battery"
+Name = "Battery"
+Scene = ExtResource("1_7typl")

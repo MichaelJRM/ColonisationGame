@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using BaseBuilding.Scripts.Systems;
 using BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 using BaseBuilding.scripts.util.common;
 using Godot;
@@ -7,23 +9,18 @@ namespace BaseBuilding.scripts.systems.PipeSystem;
 
 public partial class PipeSystem : Node3D
 {
-    private readonly PipeLineManager _pipeLineManager = new();
-    private bool _isEnabled;
     [Export] private PackedScene _pipeDetectorScene = null!;
-    [Export] private Mesh _pipeJointMesh = null!;
     [Export] private PackedScene _pipeJointScene = null!;
-    private PipeLineRenderer _pipeLineRenderer = new();
-    private PipePlacer? _pipePlacer;
     [Export] private PackedScene _pipeScene = null!;
     [Export] private PackedScene _pipeTemporaryJointScene = null!;
     [Export] private PackedScene _temporaryPipeScene = null!;
+    [Export] private Mesh _pipeJointMesh = null!;
 
+    private readonly ResourceLineManager<PipeJoint, PipeConnector> _pipeLineManager = new();
+    private readonly ResourceLineRenderer _pipeLineRenderer = new();
+    private bool _isEnabled;
+    private PipePlacer? _pipePlacer;
 
-    public void RegisterPipeConnector(PipeConnector pipeConnector)
-    {
-        pipeConnector.PipeRemovedEvent += _onPipeRemoved;
-        pipeConnector.PipeAddedEvent += _onPipeAdded;
-    }
 
     public override void _UnhandledKeyInput(InputEvent @event)
     {
@@ -48,7 +45,7 @@ public partial class PipeSystem : Node3D
     private void _disable()
     {
         _isEnabled = false;
-        _cleanPipePlacer();
+        _disposePipePlacer();
     }
 
     private void _initPipePlacer()
@@ -63,7 +60,7 @@ public partial class PipeSystem : Node3D
         AddChild(_pipePlacer);
     }
 
-    private void _cleanPipePlacer()
+    private void _disposePipePlacer()
     {
         _pipePlacer?.Disable();
         _pipePlacer = null!;
@@ -71,115 +68,111 @@ public partial class PipeSystem : Node3D
 
     private void _resetPipePlacer()
     {
-        _cleanPipePlacer();
+        _disposePipePlacer();
         _initPipePlacer();
     }
 
     private void _completePipePlacement(PipeJoint[] pipeJoints)
     {
         if (!_pipePlacer!.IsPlacementValid) return;
-        var processedPipeJoints = pipeJoints.Select(
-            pipeJoint => pipeJoint is TemporaryPipeJoint temporaryPipeJoint
-                ? _createPermanentPipeJointFromTemporary(temporaryPipeJoint)
-                : pipeJoint
-        ).ToArray();
-        for (var i = 0; i < processedPipeJoints.Length - 1; i++)
-            _connectJoints(processedPipeJoints[i], processedPipeJoints[i + 1]);
+        var processedJoints = new PipeJoint[pipeJoints.Length].AsSpan();
+
+        for (var i = 0; i < pipeJoints.Length; i++)
+        {
+            processedJoints[i] = TransformTempIntoPermIfNecessary(pipeJoints[i]);
+        }
+
+        for (var i = 0; i < processedJoints.Length - 1; i++)
+        {
+            ConnectJoints(processedJoints[i], processedJoints[i + 1]);
+        }
+
         _resetPipePlacer();
-        _pipePlacer!.Enable(processedPipeJoints.Last());
-    }
+        _pipePlacer!.Enable(processedJoints[^1]);
+        return;
 
-    private void _connectJoints(PipeJoint startPipeJoint, PipeJoint endPipeJoint)
-    {
-        startPipeJoint.ConnectToJoint(endPipeJoint, _pipeScene);
+        // Helper functions //
+        PipeJoint TransformTempIntoPermIfNecessary(PipeJoint pipeJoint)
+        {
+            return pipeJoint is TemporaryPipeJoint temporaryPipeJoint
+                ? CreatePermanentPipeJointFromTemporary(temporaryPipeJoint)
+                : pipeJoint;
 
-        if (startPipeJoint.IsConnectedToPipeLine() && endPipeJoint.IsConnectedToPipeLine())
-        {
-            if (startPipeJoint.GetPipeLineId() != endPipeJoint.GetPipeLineId())
-                _pipeLineManager.MergePipeLines(
-                    (uint)startPipeJoint.GetPipeLineId()!,
-                    (uint)endPipeJoint.GetPipeLineId()!
-                );
-        }
-        else if (!startPipeJoint.IsConnectedToPipeLine() && !endPipeJoint.IsConnectedToPipeLine())
-        {
-            var pipeLineId = _pipeLineManager.CreatePipeLine();
-            _pipeLineManager.AddPipeJoint(startPipeJoint, pipeLineId);
-            _pipeLineManager.AddPipeJoint(endPipeJoint, pipeLineId);
-        }
-        else
-        {
-            if (startPipeJoint.IsConnectedToPipeLine())
+            PipeJoint CreatePermanentPipeJointFromTemporary(TemporaryPipeJoint tempPipeJoint)
             {
-                var pipeLineId = (uint)startPipeJoint.GetPipeLineId()!;
-                _pipeLineManager.AddPipeJoint(endPipeJoint, pipeLineId);
-            }
+                var permJoint = tempPipeJoint.OwnerPipe == null
+                    ? CreatePermanentPipeJointAtPosition(tempPipeJoint.GlobalPosition)
+                    : CreatePermanentPipeJointOnPipe(tempPipeJoint.OwnerPipe,
+                        tempPipeJoint.GlobalPosition);
+                tempPipeJoint.QueueFree();
+                return permJoint;
 
-            else
-            {
-                var pipeLineId = (uint)endPipeJoint.GetPipeLineId()!;
-                _pipeLineManager.AddPipeJoint(startPipeJoint, pipeLineId);
+                PipeJoint CreatePermanentPipeJointAtPosition(Vector3 globalPosition)
+                {
+                    var instance = _pipeJointScene.Instantiate<PipeJoint>();
+                    instance.Position = globalPosition;
+                    CommitPipeJoint(instance);
+                    return instance;
+                }
+
+                PipeJoint CreatePermanentPipeJointOnPipe(Pipe pipe, Vector3 globalPosition)
+                {
+                    var instance = _pipeJointScene.Instantiate<PipeJoint>();
+                    instance.OwnerPipe = pipe;
+                    instance.Position = MathUtil.GetParallelPosition(pipe.GlobalTransform, globalPosition);
+                    CommitPipeJoint(instance);
+                    pipe.FrontJoint.DisconnectFromJoint(pipe.BackJoint);
+                    pipe.BackJoint.ConnectToJoint(instance, _pipeScene);
+                    pipe.FrontJoint.ConnectToJoint(instance, _pipeScene);
+                    var pipeLineId = (uint)(pipe.BackJoint.GetLineId() ?? pipe.FrontJoint.GetLineId())!;
+                    _pipeLineManager.AddJoint(pipeLineId, instance);
+                    return instance;
+                }
+
+                void CommitPipeJoint(PipeJoint joint)
+                {
+                    joint.PipeAddedEvent += OnPipeAdded;
+                    joint.PipeRemovedEvent += OnPipeRemoved;
+                    AddChild(joint);
+                    joint.SetRenderId(
+                        _pipeLineRenderer.AddJoint(
+                            GetWorld3D(),
+                            _pipeJointMesh,
+                            joint.GlobalTransform.TranslatedLocal(new Vector3(0.0f, joint.MeshOriginOffset, 0.0f))
+                        )
+                    );
+
+                    void OnPipeAdded(Pipe pipe)
+                    {
+                        AddChild(pipe);
+                        pipe.SetRenderId(
+                            _pipeLineRenderer.AddLimb(
+                                GetWorld3D(),
+                                pipe.CreateMesh(true),
+                                pipe.GlobalTransform
+                            )
+                        );
+                    }
+
+                    void OnPipeRemoved(Pipe pipe)
+                    {
+                        _pipeLineRenderer.RemoveLimb(
+                            (uint)pipe.RenderId!,
+                            pipe.GlobalTransform
+                        );
+                        pipe.QueueFree();
+                    }
+                }
             }
+        }
+
+        void ConnectJoints(PipeJoint startPipeJoint, PipeJoint endPipeJoint)
+        {
+            startPipeJoint.ConnectToJoint(endPipeJoint, _pipeScene);
+            _pipeLineManager.Connect(startPipeJoint, endPipeJoint);
         }
     }
 
-
-    private PipeJoint _createPermanentPipeJointFromTemporary(TemporaryPipeJoint temporaryPipeJoint)
-    {
-        var pipeJoint = temporaryPipeJoint.OwnerPipe == null
-            ? _createPermanentPipeJointAtPosition(temporaryPipeJoint.GlobalPosition)
-            : _createPermanentPipeJointOnPipe(temporaryPipeJoint.OwnerPipe, temporaryPipeJoint.GlobalPosition);
-        temporaryPipeJoint.QueueFree();
-        return pipeJoint;
-    }
-
-    private PipeJoint _createPermanentPipeJointAtPosition(Vector3 globalPosition)
-    {
-        var pipeJoint = _pipeJointScene.Instantiate<PipeJoint>();
-        pipeJoint.Position = globalPosition;
-        _commitPipeJoint(pipeJoint);
-        return pipeJoint;
-    }
-
-    private PipeJoint _createPermanentPipeJointOnPipe(Pipe pipe, Vector3 globalPosition)
-    {
-        var pipeJoint = _pipeJointScene.Instantiate<PipeJoint>();
-        pipeJoint.OwnerPipe = pipe;
-        pipeJoint.Position = MathUtil.GetParallelPosition(pipe.GlobalTransform, globalPosition);
-        _commitPipeJoint(pipeJoint);
-        pipe.FrontPipeJoint.DisconnectFromJoint(pipe.BackPipeJoint);
-        pipe.BackPipeJoint.ConnectToJoint(pipeJoint, _pipeScene);
-        pipe.FrontPipeJoint.ConnectToJoint(pipeJoint, _pipeScene);
-        var pipeLineId = (uint)(pipe.BackPipeJoint.GetPipeLineId() ?? pipe.FrontPipeJoint.GetPipeLineId())!;
-        _pipeLineManager.AddPipeJoint(pipeJoint, pipeLineId);
-        return pipeJoint;
-    }
-
-    private void _commitPipeJoint(PipeJoint pipeJoint)
-    {
-        pipeJoint.PipeAddedEvent += _onPipeAdded;
-        pipeJoint.PipeRemovedEvent += _onPipeRemoved;
-        AddChild(pipeJoint);
-        pipeJoint.SetRenderId(
-            _pipeLineRenderer.AddJoint(
-                GetWorld3D(),
-                _pipeJointMesh,
-                pipeJoint.GlobalTransform
-            )
-        );
-    }
-
-    private void _onPipeAdded(object? sender, Pipe pipe)
-    {
-        AddChild(pipe);
-        pipe.SetRenderId(_pipeLineRenderer.AddPipe(GetWorld3D(), pipe.CreateMesh(), pipe.GlobalTransform));
-    }
-
-    private void _onPipeRemoved(object? sender, Pipe pipe)
-    {
-        _pipeLineRenderer.RemovePipe((int)pipe.RendererId!, pipe.GlobalTransform);
-        pipe.QueueFree();
-    }
 
     public override void _ExitTree()
     {

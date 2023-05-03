@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://1hl04gas5bnf"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/EnergySystem/WireJoint.cs" id="1_j0wdk"]
+[ext_resource type="PackedScene" uid="uid://cdtuem8u2g03c" path="res://Assets/EnergySystem/EnergyPoll/EnergyPoll.blend" id="2_ftlhr"]
+[ext_resource type="PackedScene" uid="uid://cgnww4uwouh1m" path="res://Scripts/Util/debug/DebugNode.tscn" id="3_rvaid"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_80bmb"]
+radius = 2.0
+
+[node name="WireJoint" type="Area3D" node_paths=PackedStringArray("_debugLineIdLabel", "WireOrigin")]
+collision_layer = 11
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_j0wdk")
+_debugLineIdLabel = NodePath("DebugNode/LineId")
+WireOrigin = NodePath("WireOrigin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_80bmb")
+
+[node name="EnergyPoll" parent="." instance=ExtResource("2_ftlhr")]
+
+[node name="WireOrigin" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.24091, 0)
+
+[node name="DebugNode" parent="." instance=ExtResource("3_rvaid")]
+
+[node name="LineId" type="Label3D" parent="DebugNode"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.89332, 0)
+billboard = 1
+text = "LineID"
+font_size = 40
+outline_size = 5

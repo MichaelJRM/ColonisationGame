@@ -1,18 +1,23 @@
-﻿using BaseBuilding.scripts.singletons;
+﻿using System;
+using BaseBuilding.scripts.singletons;
 using BaseBuilding.scripts.systems.BuildingSystem;
-using BaseBuilding.Scripts.Systems.EnergySystem.WireConnector;
+using BaseBuilding.Scripts.Systems.EnergySystem.Wire;
 using BaseBuilding.Scripts.WorldResources.util;
 using Godot;
-using Godot.Collections;
 
-namespace BaseBuilding.Scripts.WorldResources;
+namespace BaseBuilding.Scripts.WorldResources.SolarPowerCell;
 
 public partial class SolarPanelCell : Node
 {
+    /// <summary>
+    /// The amount of energy that gets generated every game second.
+    /// </summary>
     [Export] private float _generationRatePerSecond;
+
+    [Export] private WireOutputConnector[] _wireOutputConnectors = Array.Empty<WireOutputConnector>();
+
     private Global _global = null!;
     private ThrottledGenerator _throttledGenerator = null!;
-    [Export] private Array<WireOutputConnector> _wireOutputConnectors = new();
 
 
     public override void _Ready()
@@ -30,7 +35,11 @@ public partial class SolarPanelCell : Node
 
     private void _activateConnectors()
     {
-        foreach (var wireOutputConnector in _wireOutputConnectors) wireOutputConnector.Activate(_onResourceAsked);
+        foreach (var wireOutputConnector in _wireOutputConnectors)
+        {
+            wireOutputConnector.BindOnResourceAsked(_onResourceAsked);
+            wireOutputConnector.Activate();
+        }
     }
 
     private float _onResourceAsked(float amount)

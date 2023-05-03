@@ -7,8 +7,9 @@ public partial class Global : Node
 {
     private Camera3D _camera = null!;
     private Viewport _viewport = null!;
-    public Vector3 MousePositionInWorld { get; private set; } = new(0.0f, 0.0f, 0.0f);
+    public Vector3 MousePositionInWorld { get; private set; } = Vector3.Zero;
     public double GameTimeInSeconds { get; private set; }
+    public bool IsDebugModeEnabled { get; set; } = true;
 
     public override void _Ready()
     {

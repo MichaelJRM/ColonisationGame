@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://csk0fr7dyjay4"]
+
+[ext_resource type="Script" path="res://Scripts/WorldResources/SolarPowerCell/SolarPanelCell.cs" id="1_m07u1"]
+
+[node name="SolarPowerCell" type="Node"]
+script = ExtResource("1_m07u1")
