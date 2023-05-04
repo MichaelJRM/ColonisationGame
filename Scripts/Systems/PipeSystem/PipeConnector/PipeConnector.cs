@@ -8,6 +8,7 @@ public partial class PipeConnector : PipeJoint, IResourceConnector
 {
     [Export] private WorldResource _acceptedResource = null!;
 
+
     public override void _Ready()
     {
         Monitorable = false;

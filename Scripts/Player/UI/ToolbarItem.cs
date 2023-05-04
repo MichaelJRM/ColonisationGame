@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using BaseBuilding.scripts.systems.BuildingSystem;
 using Godot;
 
@@ -7,8 +6,8 @@ namespace BaseBuilding.Scripts.Player.UI;
 
 public partial class ToolbarItem : TextureButton
 {
-    private HBoxContainer _resourcesContainer = null!;
     [Export] private PackedScene _subItemScene = null!;
+    private HBoxContainer _resourcesContainer = null!;
     public event EventHandler<BuildingResource>? BuildingPressed;
     public event Action<ToolbarItem>? Toggle;
 

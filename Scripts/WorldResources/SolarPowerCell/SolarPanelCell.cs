@@ -15,16 +15,17 @@ public partial class SolarPanelCell : Node
     [Export] private float _generationRatePerSecond;
 
     [Export] private WireOutputConnector[] _wireOutputConnectors = Array.Empty<WireOutputConnector>();
-
     private ThrottledGenerator _throttledGenerator = null!;
 
 
     public override void _Ready()
     {
+        _validate();
         var building = GetParent<Building>();
         building.PlacedEvent += _activate;
         _throttledGenerator = new ThrottledGenerator(_generationRatePerSecond, Global.Instance.GameTimeInSeconds);
     }
+
 
     private void _activate()
     {
@@ -43,5 +44,17 @@ public partial class SolarPanelCell : Node
     private float _onResourceAsked(float amount)
     {
         return _throttledGenerator.Generate(amount, Global.Instance.GameTimeInSeconds);
+    }
+
+    private void _validate()
+    {
+        if (_wireOutputConnectors.Length == 0)
+            throw new Exception("SolarPanelCell: Wire output connectors not assigned!");
+    }
+
+    public override void _ExitTree()
+    {
+        var building = GetParent<Building>();
+        building.PlacedEvent -= _activate;
     }
 }

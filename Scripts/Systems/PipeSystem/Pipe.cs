@@ -14,8 +14,8 @@ public partial class Pipe : Area3D
     public uint? RenderId { get; private set; }
     public PipeJoint FrontJoint { get; private set; } = null!;
     public PipeJoint BackJoint { get; private set; } = null!;
-
     public CollisionShape3D CollisionShape = null!;
+
 
     public void SetRenderId(uint renderId)
     {

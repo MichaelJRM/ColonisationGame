@@ -133,6 +133,7 @@ public partial class PipeSystem : Node3D
                 {
                     joint.PipeAddedEvent += OnPipeAdded;
                     joint.PipeRemovedEvent += OnPipeRemoved;
+                    joint.TreeExited += OnJointRemoved;
                     AddChild(joint);
                     joint.SetRenderId(
                         _pipeLineRenderer.AddJoint(
@@ -161,6 +162,12 @@ public partial class PipeSystem : Node3D
                             pipe.GlobalTransform
                         );
                         pipe.QueueFree();
+                    }
+
+                    void OnJointRemoved()
+                    {
+                        joint.PipeAddedEvent -= OnPipeAdded;
+                        joint.PipeRemovedEvent -= OnPipeRemoved;
                     }
                 }
             }

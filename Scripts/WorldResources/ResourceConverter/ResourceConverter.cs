@@ -18,6 +18,7 @@ public partial class ResourceConverter : Node
     [Export] private Area3D[] _resourceInputConnectors = Array.Empty<Area3D>();
     IResourceInputConnector[] _iResourceInputConnectors = Array.Empty<IResourceInputConnector>();
     [Export] private Area3D[] _resourceOutputConnectors = Array.Empty<Area3D>();
+
     IResourceOutputConnector[] _iResourceOutputConnectors = Array.Empty<IResourceOutputConnector>();
 
     // ----------------------------------------------------------
@@ -33,6 +34,7 @@ public partial class ResourceConverter : Node
 
     public override void _Ready()
     {
+        _validate();
         var building = GetParent<Building>();
         building.PlacedEvent += _activate;
 
@@ -153,5 +155,23 @@ public partial class ResourceConverter : Node
                 conversionData.InputAmount * howManyUnitsCanBeMadeOverall;
             _outputResourceStorageAmount[conversionData.OutputResource.Id] += outputAmount;
         }
+    }
+
+    private void _validate()
+    {
+        if (_resourceInputConnectors.Length == 0)
+            throw new Exception("ResourceConverter: Resource input connectors not assigned!");
+        if (_resourceOutputConnectors.Length == 0)
+            throw new Exception("ResourceConverter: Resource output connectors not assigned!");
+        if (_resourceConversionData.Length == 0)
+            throw new Exception("ResourceConverter: Resource conversion data not assigned!");
+        if (_resourceStorageData.Length == 0)
+            throw new Exception("ResourceConverter: Resource storage data not assigned!");
+    }
+
+    public override void _ExitTree()
+    {
+        var building = GetParent<Building>();
+        building.PlacedEvent -= _activate;
     }
 }

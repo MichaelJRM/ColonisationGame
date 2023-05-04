@@ -23,6 +23,7 @@ public partial class PipeJoint : Area3D, IResourceJoint
     public event Action<Pipe> PipeRemovedEvent = null!;
     public event Action<Pipe> PipeAddedEvent = null!;
 
+
     public void SetRenderId(uint renderId)
     {
         RenderId = renderId;

@@ -42,7 +42,7 @@ shape = SubResource("BoxShape3D_dd2sg")
 [node name="Lighting" type="Node" parent="."]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 0.672289, 0.740289, 0, -0.740289, 0.672289, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 0.45778, 0.889065, 0, -0.889065, 0.45778, 0, 0, 0)
 shadow_enabled = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Lighting"]

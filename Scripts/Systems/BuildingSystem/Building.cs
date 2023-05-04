@@ -11,7 +11,6 @@ public partial class Building : Node3D
 {
     [Export] public Area3D CollisionArea = null!;
     [Export] public MeshInstance3D[] MeshInstances { get; private set; } = Array.Empty<MeshInstance3D>();
-
     public readonly List<IsPlacementValidCallback> IsPlacementValidCallbacks = new();
     private bool _isPlaced;
     public event Action? PlacedEvent;

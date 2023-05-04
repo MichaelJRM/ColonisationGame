@@ -20,7 +20,9 @@ public partial class ResourceExtractor : Node3D
 
     public override void _Ready()
     {
-        if (Resource == null) throw new Exception("ResourceExtractor: Resource is null!");
+        if (Resource == null) throw new Exception("ResourceExtractor: Resource not assigned!");
+        if (_wireInputConnector == null) throw new Exception("ResourceExtractor: Wire input connector not assigned!");
+
         _gameTimeStamp = Global.Instance.GameTimeInSeconds;
         _throttledGenerator = new ThrottledGenerator(_extractionRate, Global.Instance.GameTimeInSeconds);
         var building = GetParent<Building>();
@@ -41,5 +43,11 @@ public partial class ResourceExtractor : Node3D
         var amountAvailable = _throttledGenerator.Generate(amount, Global.Instance.GameTimeInSeconds);
         var amountExtracted = ResourceDeposit.Take(amountAvailable);
         return amountExtracted;
+    }
+
+    public override void _ExitTree()
+    {
+        var building = GetParent<Building>();
+        building.PlacedEvent -= _activate;
     }
 }

@@ -67,4 +67,10 @@ public partial class LiquidResourceExtractor : ResourceExtractor
             area is ResourceDeposit.ResourceDeposit deposit && deposit.Resource.Id == Resource.Id);
         return ResourceDeposit != null;
     }
+
+    public override void _ExitTree()
+    {
+        var building = GetParent<Building>();
+        building.PlacedEvent -= _activate;
+    }
 }

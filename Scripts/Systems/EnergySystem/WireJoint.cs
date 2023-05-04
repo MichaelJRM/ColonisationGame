@@ -22,10 +22,8 @@ public partial class WireJoint : Area3D, IResourceJoint
         new(-0.043947f, -0.03193f),
     };
 
-
     protected readonly List<WireJoint> ConnectedJoints = new();
     private readonly List<(MeshInstance3D, WireJoint)> _wireMeshInstances = new();
-
     private uint? _lineId;
 
     public void SetLineId(uint? lineId)

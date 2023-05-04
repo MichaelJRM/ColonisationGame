@@ -14,9 +14,9 @@ public partial class ResourceStorage : Node
     [Export] private int _inputRateAmount = 1;
     [Export] private Label3D _debugStorageLabel = null!;
     [Export] private WorldResource _resource = null!;
-
     private float _currentAmount;
     private TickComponent _inputTick = new();
+
 
     protected virtual IResourceInputConnector[] GetInputConnectors()
     {
@@ -30,6 +30,7 @@ public partial class ResourceStorage : Node
 
     public override void _Ready()
     {
+        _validate();
         var building = GetParent<Building>();
         building.PlacedEvent += _activate;
     }
@@ -87,5 +88,17 @@ public partial class ResourceStorage : Node
                 _add(inputConnector.RequestResource(_inputRateAmount));
             }
         }
+    }
+
+    private void _validate()
+    {
+        if (_resource == null) throw new Exception("ResourceStorage: Resource not assigned!");
+        if (_debugStorageLabel == null) throw new Exception("ResourceStorage: Debug storage label not assigned!");
+    }
+
+    public override void _ExitTree()
+    {
+        var building = GetParent<Building>();
+        building.PlacedEvent -= _activate;
     }
 }

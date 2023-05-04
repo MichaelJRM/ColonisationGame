@@ -8,11 +8,10 @@ namespace BaseBuilding.Scripts.Systems.EnergySystem;
 
 public partial class EnergySystem : Node3D
 {
-    private bool _isEnabled;
-    private WirePlacementSystem? _wirePlacementSystem;
     [Export] private PackedScene _wireJointScene = null!;
     [Export] private PackedScene _temporaryWireJointScene = null!;
-
+    private bool _isEnabled;
+    private WirePlacementSystem? _wirePlacementSystem;
     private readonly ResourceLineManager<WireJoint, Wire.WireConnector> _wireLineManager = new();
 
     public override void _UnhandledKeyInput(InputEvent @event)
@@ -80,7 +79,8 @@ public partial class EnergySystem : Node3D
 
         // Helper Functions //
         OneOf<WireJoint, Wire.WireConnector> TransformTempIntoPermIfNecessary(
-            OneOf<WireJoint, TemporaryWireJoint, Wire.WireConnector> item)
+            OneOf<WireJoint, TemporaryWireJoint, Wire.WireConnector> item
+        )
         {
             return item.Match<OneOf<WireJoint, Wire.WireConnector>>(
                 wireJoint => wireJoint,
@@ -92,14 +92,9 @@ public partial class EnergySystem : Node3D
             {
                 var instance = _wireJointScene.Instantiate<WireJoint>();
                 instance.Position = tempWireJoint.GlobalPosition;
-                CommitWireJoint(instance);
+                AddChild(instance);
                 tempWireJoint.QueueFree();
                 return instance;
-            }
-
-            void CommitWireJoint(WireJoint joint)
-            {
-                AddChild(joint);
             }
         }
 

@@ -6,15 +6,13 @@ namespace BaseBuilding.Scripts.WorldResources.ResourceDeposit;
 public partial class ResourceDeposit : Area3D
 {
     [Export] private float _initialAmount;
-
     [Export] public WorldResource Resource { get; private set; } = null!;
-
     public float CurrentAmount { get; private set; }
 
 
     public override void _Ready()
     {
-        if (Resource == null) throw new Exception("ResourceDeposit: Resource is null!");
+        if (Resource == null) throw new Exception("ResourceDeposit: Resource not assigned!");
         CurrentAmount = _initialAmount;
     }
 
