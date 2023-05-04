@@ -59,7 +59,6 @@ public partial class WirePlacementSystem : Node
                 {
                     _onPlace(_getAllJoints());
                 }
-
                 break;
         }
     }

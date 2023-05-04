@@ -26,7 +26,7 @@ public class ResourceLine<TJoint, TConnector> where TJoint : IResourceJoint wher
         _connectors.Add(connector);
         if (connector is IResourceInputConnector)
         {
-            ((IResourceInputConnector)connector).BindOnResourceRequested(_onResourceRequested);
+            ((IResourceInputConnector)connector).BindSource(_onResourceRequested);
             ((IResourceInputConnector)connector).Activate();
         }
     }
@@ -47,7 +47,6 @@ public class ResourceLine<TJoint, TConnector> where TJoint : IResourceJoint wher
     }
 
     private float _onResourceRequested(
-        WorldResource worldResource,
         float amount,
         IResourceInputConnector inputConnector
     )
@@ -55,7 +54,7 @@ public class ResourceLine<TJoint, TConnector> where TJoint : IResourceJoint wher
         var inputOwner = inputConnector.GetOwner();
         var connectorsWithResource = _connectors.Where(e =>
             e is IResourceOutputConnector
-            && e.AcceptsResource(worldResource)
+            && e.AcceptsResource(inputConnector.GetAcceptedResource())
             && e.GetOwner() != inputOwner
         ).ToArray();
         if (connectorsWithResource.Length == 0) return 0f;
@@ -67,7 +66,7 @@ public class ResourceLine<TJoint, TConnector> where TJoint : IResourceJoint wher
             foreach (var connector in connectorsWithResource)
             {
                 var gathered =
-                    ((IResourceOutputConnector)connector).AskForResource(worldResource, amountPerConnector);
+                    ((IResourceOutputConnector)connector).AskForResource(amountPerConnector);
                 amountGathered += gathered;
             }
 

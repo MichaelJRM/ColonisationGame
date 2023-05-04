@@ -45,7 +45,7 @@ public partial class BuildingPlacementSystem : Node
                 if (isPlacementValid)
                 {
                     _preview.OnPlaced();
-                    foreach (var previewMeshInstance in _preview.MeshInstance3Ds)
+                    foreach (var previewMeshInstance in _preview.MeshInstances)
                     {
                         previewMeshInstance.MaterialOverlay = null;
                     }
@@ -65,7 +65,7 @@ public partial class BuildingPlacementSystem : Node
         _resource = buildingResource;
         _preview = buildingResource.Scene.Instantiate<Building>();
         _preview.Position = Global.Instance.GetMousePositionInWorld();
-        foreach (var previewMeshInstance in _preview.MeshInstance3Ds)
+        foreach (var previewMeshInstance in _preview.MeshInstances)
             previewMeshInstance.MaterialOverlay = _placementMaterial;
         AddChild(_preview);
         _status = StatusEnum.Placing;

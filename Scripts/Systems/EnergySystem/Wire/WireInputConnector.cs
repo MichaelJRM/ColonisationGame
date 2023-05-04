@@ -1,5 +1,4 @@
-﻿using System;
-using BaseBuilding.Scripts.WorldResources;
+﻿using System.Diagnostics;
 
 namespace BaseBuilding.Scripts.Systems.EnergySystem.Wire;
 
@@ -7,18 +6,13 @@ public partial class WireInputConnector : WireConnector, IResourceInputConnector
 {
     private OnResourceRequestedCallback? _onResourceRequestedCallback;
 
-    public void BindOnResourceRequested(OnResourceRequestedCallback onResourceRequestedCallback)
+    public void BindSource(OnResourceRequestedCallback onResourceRequestedCallback)
     {
         _onResourceRequestedCallback = onResourceRequestedCallback;
     }
 
-    public float RequestResource(WorldResource resource)
+    public float RequestResource(float amount)
     {
-        var isResourceAccepted = AcceptsResource(resource);
-        if (!isResourceAccepted)
-            throw new Exception(
-                $"Connector {Name} requested resource {resource.Name} which it does not accept"
-            );
-        return _onResourceRequestedCallback!.Invoke(resource, FlowRate, this);
+        return _onResourceRequestedCallback!.Invoke(amount, this);
     }
 }

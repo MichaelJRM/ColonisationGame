@@ -1,7 +1,4 @@
-﻿using System;
-using BaseBuilding.Scripts.WorldResources;
-
-namespace BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
+﻿namespace BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 
 public partial class PipeOutputConnector : PipeConnector, IResourceOutputConnector
 {
@@ -12,13 +9,8 @@ public partial class PipeOutputConnector : PipeConnector, IResourceOutputConnect
         _resourceAskedCallback = resourceLineOutputConnector;
     }
 
-    public float AskForResource(WorldResource worldResource, float amountPerConnector)
+    public float AskForResource(float amount)
     {
-        var isResourceAccepted = AcceptsResource(worldResource);
-        if (!isResourceAccepted)
-            throw new Exception(
-                $"Connector {Name} was asked for resource {worldResource.Name} which it does not accept"
-            );
-        return _resourceAskedCallback.Invoke(amountPerConnector);
+        return _resourceAskedCallback.Invoke(amount);
     }
 }

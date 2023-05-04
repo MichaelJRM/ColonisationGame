@@ -130,9 +130,9 @@ func _update_camera_rotation(event: InputEvent) -> void:
 		global_rotate(Vector3.UP, y_rotation)
 		_rotation.rotate_object_local(_rotation.basis.x.normalized(), x_rotation if _rotation.rotation.x + x_rotation >= 0 else 0.0)
 		_camera_bottom_collision_raycast.force_raycast_update()
-		if  _camera_bottom_collision_raycast.is_colliding():
-			transform = lastTransform
-			_rotation.transform = lastRotationTransform
+#		if  _camera_bottom_collision_raycast.is_colliding():
+#			transform = lastTransform
+#			_rotation.transform = lastRotationTransform
 
 
 func _unhandled_input(event: InputEvent) -> void:

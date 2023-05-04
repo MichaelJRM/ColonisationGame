@@ -1,0 +1,9 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://cwhrbko470hbl"]
+
+[ext_resource type="Resource" uid="uid://ck3hhrhusu8mr" path="res://Gameplay/WorldResources/entities/WaterResource.tres" id="1_d2p70"]
+[ext_resource type="Script" path="res://Scripts/WorldResources/ResourceStorageData.cs" id="2_c0h3f"]
+
+[resource]
+script = ExtResource("2_c0h3f")
+Capacity = 200.0
+Resource = ExtResource("1_d2p70")

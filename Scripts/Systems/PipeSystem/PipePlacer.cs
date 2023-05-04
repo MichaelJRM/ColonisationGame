@@ -67,7 +67,11 @@ public partial class PipePlacer : Node
                 break;
             case Status.PlacingEndJoint:
                 _status = Status.Disabled;
-                _onPlace(_getAllJoints());
+                if (IsPlacementValid)
+                {
+                    _onPlace(_getAllJoints());
+                }
+
                 break;
         }
     }
@@ -190,8 +194,20 @@ public partial class PipePlacer : Node
 
     private void _calculateIfPlacementIsValid()
     {
-        var isAreaValid = _pipeDetector.IsAreaValid;
-        var pipePlacementIsValid = _temporaryPipeGenerator.IsPlacementValid;
+        // var overlappingAreas = _pipeDetector.GetOverlappingAreas();
+        // var isColliding = overlappingAreas.Any(e => e is not PipeJoint && e is not Pipe);
+        // if (isColliding)
+        // {
+        //     IsPlacementValid = false;
+        //     return;
+        // }
+
+        var isPipePlacementValid = _temporaryPipeGenerator.IsPlacementValid;
+        if (!isPipePlacementValid)
+        {
+            IsPlacementValid = false;
+            return;
+        }
 
         var allJoints = new List<PipeJoint>(_intermediateJoints.Count + 2);
         if (_startJoint != null) allJoints.Add(_startJoint!);
@@ -206,7 +222,7 @@ public partial class PipePlacer : Node
                 break;
             }
 
-        IsPlacementValid = isAreaValid && pipePlacementIsValid && _areJointsValid;
+        IsPlacementValid = _areJointsValid;
     }
 
     private void _calculateIntermediateJoints()
@@ -485,7 +501,7 @@ internal partial class TemporaryPipeGenerator : Node
 
     private void _calculateIfPlacementIsValid()
     {
-        foreach (var temporaryPipe in CollectionsMarshal.AsSpan(_pipes))
+        foreach (var temporaryPipe in CollectionsMarshal.AsSpan(_pipes).Slice(0, _pipes.Count - 1))
         {
             var overlappingAreas = temporaryPipe.GetOverlappingAreas();
             for (var i = 0; i < overlappingAreas.Count; i++)

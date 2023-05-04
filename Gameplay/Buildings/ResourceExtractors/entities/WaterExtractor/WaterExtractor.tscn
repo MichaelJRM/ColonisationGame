@@ -1,45 +1,53 @@
-[gd_scene load_steps=7 format=3 uid="uid://cg0u7pbmawqai"]
+[gd_scene load_steps=9 format=3 uid="uid://cg0u7pbmawqai"]
 
 [ext_resource type="PackedScene" uid="uid://cgalnxwfl3wc" path="res://Gameplay/Buildings/Building.tscn" id="1_ql324"]
 [ext_resource type="PackedScene" uid="uid://c00mvnwu3kc3x" path="res://Scripts/WorldResources/LiquidResourceExtractor/LiquidResourceExtractor.tscn" id="2_scedc"]
 [ext_resource type="Resource" uid="uid://ck3hhrhusu8mr" path="res://Gameplay/WorldResources/entities/WaterResource.tres" id="4_33wk6"]
+[ext_resource type="PackedScene" uid="uid://c6okg7jbccwl" path="res://Assets/Buildings/Extractors/WaterExtractor.blend" id="5_rbkws"]
 [ext_resource type="PackedScene" uid="uid://ctfk5lcy6ynxd" path="res://Scripts/Systems/PipeSystem/PipeConnector/PipeOutputConnector.tscn" id="5_xf66f"]
+[ext_resource type="PackedScene" uid="uid://bv32uektbmuv" path="res://Scripts/Systems/EnergySystem/Wire/WireInputConnector.tscn" id="6_m3vge"]
+[ext_resource type="Resource" uid="uid://c4xlcxt1r6fuv" path="res://Gameplay/WorldResources/entities/Energy.tres" id="7_4gdr1"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_it2am"]
 height = 0.2
 radius = 5.0
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_hhvcu"]
-top_radius = 5.0
-bottom_radius = 5.0
-radial_segments = 40
-rings = 1
-cap_bottom = false
-
-[node name="WaterExtractor" node_paths=PackedStringArray("MeshInstance3Ds") instance=ExtResource("1_ql324")]
-MeshInstance3Ds = [NodePath("MeshInstance3D")]
+[node name="WaterExtractor" node_paths=PackedStringArray("MeshInstances") instance=ExtResource("1_ql324")]
+MeshInstances = [NodePath("WaterExtractor/WaterExtractor_001")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 shape = SubResource("CylinderShape3D_it2am")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CylinderMesh_hhvcu")
-
-[node name="LiquidResourceExtractor" parent="." index="2" node_paths=PackedStringArray("_pipeOutputConnectors") instance=ExtResource("2_scedc")]
+[node name="LiquidResourceExtractor" parent="." index="1" node_paths=PackedStringArray("_pipeOutputConnectors", "_wireInputConnector") instance=ExtResource("2_scedc")]
 _pipeOutputConnectors = [NodePath("../PipeOutputConnector")]
 _extractionRate = 10.0
 Resource = ExtResource("4_33wk6")
+_wireInputConnector = NodePath("../WireInputConnector")
+_energyConsumptionPerExtraction = 10.0
 
 [node name="Label3D" type="Label3D" parent="LiquidResourceExtractor" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.64066, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.93884, -2.59462)
 billboard = 1
 text = "sdasdsadasdasda"
 font_size = 60
 outline_size = 10
 
-[node name="PipeOutputConnector" parent="." index="3" instance=ExtResource("5_xf66f")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5.25538)
-_acceptedResources = Array[Resource]([ExtResource("4_33wk6")])
-FlowRate = 10.0
+[node name="PipeOutputConnector" parent="." index="2" instance=ExtResource("5_xf66f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.631076, 5.30363)
+_acceptedResource = ExtResource("4_33wk6")
+MaxConnectionsAllowed = 1
+
+[node name="WaterExtractor" parent="." index="3" instance=ExtResource("5_rbkws")]
+
+[node name="WireInputConnector" parent="." index="4" instance=ExtResource("6_m3vge")]
+_acceptedResource = ExtResource("7_4gdr1")
+
+[node name="WireOrigin" parent="WireInputConnector" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.54797, 0)
+
+[node name="LineId" parent="WireInputConnector/DebugNode" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.93662, 0)
+
+[editable path="WaterExtractor"]
+[editable path="WireInputConnector"]

@@ -1,32 +1,44 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BaseBuilding.scripts.common;
+using BaseBuilding.Scripts.Systems;
 using BaseBuilding.scripts.systems.BuildingSystem;
-using BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 using Godot;
 
 namespace BaseBuilding.Scripts.WorldResources.ResourceConverter;
 
 public partial class ResourceConverter : Node
 {
-    private readonly TickComponent _conversionTick = new();
-    private readonly System.Collections.Generic.Dictionary<string, float> _inputResourceStorageAmount = new();
-    private readonly System.Collections.Generic.Dictionary<string, float> _inputResourceStorageCapacity = new();
-    private readonly TickComponent _inputTick = new();
-    private readonly System.Collections.Generic.Dictionary<string, float> _outputResourceStorageAmount = new();
-    private readonly System.Collections.Generic.Dictionary<string, float> _outputResourceStorageCapacity = new();
     [Export] private int _conversionRate = 1;
+
     [Export] private int _inputRate = 1;
-    [Export] private PipeInputConnector[] _pipeInputConnectors = Array.Empty<PipeInputConnector>();
-    [Export] private PipeOutputConnector[] _pipeOutputConnectors = Array.Empty<PipeOutputConnector>();
+
+    // Workaround while Godot doesn't support Interface exports.
+    [Export] private Area3D[] _resourceInputConnectors = Array.Empty<Area3D>();
+    IResourceInputConnector[] _iResourceInputConnectors = Array.Empty<IResourceInputConnector>();
+    [Export] private Area3D[] _resourceOutputConnectors = Array.Empty<Area3D>();
+    IResourceOutputConnector[] _iResourceOutputConnectors = Array.Empty<IResourceOutputConnector>();
+
+    // ----------------------------------------------------------
     [Export] private ResourceConversionData[] _resourceConversionData = Array.Empty<ResourceConversionData>();
     [Export] private ResourceStorageData[] _resourceStorageData = Array.Empty<ResourceStorageData>();
+    private readonly TickComponent _conversionTick = new();
+    private readonly Dictionary<string, float> _inputResourceStorageAmount = new();
+    private readonly Dictionary<string, float> _inputResourceStorageCapacity = new();
+    private readonly TickComponent _inputTick = new();
+    private readonly Dictionary<string, float> _outputResourceStorageAmount = new();
+    private readonly Dictionary<string, float> _outputResourceStorageCapacity = new();
 
 
     public override void _Ready()
     {
         var building = GetParent<Building>();
         building.PlacedEvent += _activate;
+
+        // Workaround while Godot doesn't support Interface exports.
+        _iResourceInputConnectors = Array.ConvertAll(_resourceInputConnectors, e => (IResourceInputConnector)e);
+        _iResourceOutputConnectors = Array.ConvertAll(_resourceOutputConnectors, e => (IResourceOutputConnector)e);
     }
 
     private void _activate()
@@ -52,10 +64,10 @@ public partial class ResourceConverter : Node
 
     private void _activatePipeConnectors()
     {
-        foreach (var pipeInputConnector in _pipeInputConnectors) pipeInputConnector.Activate();
+        foreach (var pipeInputConnector in _iResourceInputConnectors) pipeInputConnector.Activate();
         foreach (var conversionData in _resourceConversionData)
         {
-            foreach (var connector in _pipeOutputConnectors)
+            foreach (var connector in _iResourceOutputConnectors)
             {
                 if (connector.AcceptsResource(conversionData.OutputResource))
                 {
@@ -102,11 +114,11 @@ public partial class ResourceConverter : Node
             var storageAmount = _inputResourceStorageAmount[conversionData.InputResource.Id];
             var capacityAmount = _inputResourceStorageCapacity[conversionData.InputResource.Id];
             if (storageAmount >= capacityAmount) continue;
-            foreach (var connector in _pipeInputConnectors)
+            foreach (var connector in _iResourceInputConnectors)
             {
                 if (connector.IsConnectedToLine() && connector.AcceptsResource(conversionData.InputResource))
                 {
-                    _add(connector.RequestResource(conversionData.InputResource), conversionData.InputResource);
+                    _add(connector.RequestResource(conversionData.InputAmount), conversionData.InputResource);
                 }
             }
         }

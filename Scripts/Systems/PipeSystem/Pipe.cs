@@ -34,35 +34,35 @@ public partial class Pipe : Area3D
         mesh.SurfaceSetMaterial(0, Material);
         return mesh;
 
-        Vector2[][] GenerateLods()
-        {
-            var lods = new Vector2[3][];
-            lods[0] = _meshShape;
-            lods[1] = GenerateLod(2);
-            lods[2] = GenerateLod(3);
-            return lods;
-
-            Vector2[] GenerateLod(int divider)
-            {
-                var lod = new List<Vector2>();
-                var numVerticesToRemove = Mathf.Max(_meshShape.Length - 2 - (_meshShape.Length - 2) / divider, 0);
-                if (numVerticesToRemove == 0)
-                {
-                    return lod.ToArray();
-                }
-
-                var interval = _meshShape.Length - 3 / numVerticesToRemove;
-                lod.Add(_meshShape[0]);
-                for (var j = 1; j < numVerticesToRemove + 1; j++)
-                {
-                    var index = Mathf.RoundToInt(interval * j);
-                    lod.Add(_meshShape[index]);
-                }
-
-                lod.Add(_meshShape[_meshShape.Length - 1]);
-                return lod.ToArray();
-            }
-        }
+        // Vector2[][] GenerateLods()
+        // {
+        //     var lods = new Vector2[3][];
+        //     lods[0] = _meshShape;
+        //     lods[1] = GenerateLod(2);
+        //     lods[2] = GenerateLod(3);
+        //     return lods;
+        //
+        //     Vector2[] GenerateLod(int divider)
+        //     {
+        //         var lod = new List<Vector2>();
+        //         var numVerticesToRemove = Mathf.Max(_meshShape.Length - 2 - (_meshShape.Length - 2) / divider, 0);
+        //         if (numVerticesToRemove == 0)
+        //         {
+        //             return lod.ToArray();
+        //         }
+        //
+        //         var interval = _meshShape.Length - 3 / numVerticesToRemove;
+        //         lod.Add(_meshShape[0]);
+        //         for (var j = 1; j < numVerticesToRemove + 1; j++)
+        //         {
+        //             var index = Mathf.RoundToInt(interval * j);
+        //             lod.Add(_meshShape[index]);
+        //         }
+        //
+        //         lod.Add(_meshShape[_meshShape.Length - 1]);
+        //         return lod.ToArray();
+        //     }
+        // }
     }
 
     public bool CanCreateJointAtPosition(Vector3 globalPosition)

@@ -1,24 +1,16 @@
-﻿using System;
-using BaseBuilding.Scripts.WorldResources;
-
-namespace BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
+﻿namespace BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 
 public partial class PipeInputConnector : PipeConnector, IResourceInputConnector
 {
     private OnResourceRequestedCallback? _onResourceRequestedCallback;
 
-    public void BindOnResourceRequested(OnResourceRequestedCallback onResourceRequestedCallback)
+    public void BindSource(OnResourceRequestedCallback onResourceRequestedCallback)
     {
         _onResourceRequestedCallback = onResourceRequestedCallback;
     }
 
-    public float RequestResource(WorldResource resource)
+    public float RequestResource(float amount)
     {
-        var isResourceAccepted = AcceptsResource(resource);
-        if (!isResourceAccepted)
-            throw new Exception(
-                $"Connector {Name} requested resource {resource.Name} which it does not accept"
-            );
-        return _onResourceRequestedCallback!.Invoke(resource, FlowRate, this);
+        return _onResourceRequestedCallback!.Invoke(amount, this);
     }
 }

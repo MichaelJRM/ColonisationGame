@@ -11,7 +11,8 @@ public partial class ResourceStorage : Node
 {
     [Export] private float _capacity = 1000f;
     [Export] private int _inputRateInSeconds = 1;
-    [Export] private Label3D _debugStorageLabel;
+    [Export] private int _inputRateAmount = 1;
+    [Export] private Label3D _debugStorageLabel = null!;
     [Export] private WorldResource _resource = null!;
 
     private float _currentAmount;
@@ -83,7 +84,7 @@ public partial class ResourceStorage : Node
         {
             if (inputConnector.IsConnectedToLine())
             {
-                _add(inputConnector.RequestResource(_resource));
+                _add(inputConnector.RequestResource(_inputRateAmount));
             }
         }
     }

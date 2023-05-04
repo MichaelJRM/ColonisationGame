@@ -1,7 +1,4 @@
-﻿using System;
-using BaseBuilding.Scripts.WorldResources;
-
-namespace BaseBuilding.Scripts.Systems.EnergySystem.Wire;
+﻿namespace BaseBuilding.Scripts.Systems.EnergySystem.Wire;
 
 public partial class WireInputOutputConnector : WireConnector, IResourceOutputConnector, IResourceInputConnector
 {
@@ -17,19 +14,14 @@ public partial class WireInputOutputConnector : WireConnector, IResourceOutputCo
         }
     }
 
-    public void BindOnResourceRequested(OnResourceRequestedCallback onResourceRequestedCallback)
+    public void BindSource(OnResourceRequestedCallback onResourceRequestedCallback)
     {
         _onResourceRequestedCallback = onResourceRequestedCallback;
     }
 
-    public float RequestResource(WorldResource resource)
+    public float RequestResource(float amount)
     {
-        var isResourceAccepted = AcceptsResource(resource);
-        if (!isResourceAccepted)
-            throw new Exception(
-                $"Connector {Name} requested resource {resource.Name} which it does not accept"
-            );
-        return _onResourceRequestedCallback!.Invoke(resource, FlowRate, this);
+        return _onResourceRequestedCallback!.Invoke(amount, this);
     }
 
     private ResourceAskedCallback _resourceAskedCallback = null!;
@@ -39,13 +31,8 @@ public partial class WireInputOutputConnector : WireConnector, IResourceOutputCo
         _resourceAskedCallback = resourceLineOutputConnector;
     }
 
-    public float AskForResource(WorldResource worldResource, float amountPerConnector)
+    public float AskForResource(float amount)
     {
-        var isResourceAccepted = AcceptsResource(worldResource);
-        if (!isResourceAccepted)
-            throw new Exception(
-                $"Connector {Name} was asked for resource {worldResource.Name} which it does not accept"
-            );
-        return _resourceAskedCallback.Invoke(amountPerConnector);
+        return _resourceAskedCallback.Invoke(amount);
     }
 }

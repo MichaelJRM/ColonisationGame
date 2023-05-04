@@ -2,14 +2,15 @@
 
 [ext_resource type="Script" path="res://World/World.gd" id="1_8p71n"]
 [ext_resource type="PackedScene" uid="uid://bwslv5q00mylw" path="res://Gameplay/WorldResourceDeposits/entities/WaterDeposit.tscn" id="2_0mhrs"]
-[ext_resource type="Material" path="res://Common/Materials/uvMaterial/uv_material.tres" id="2_n2k6v"]
+[ext_resource type="Material" uid="uid://dc510q4aohars" path="res://Common/Materials/uvMaterial/uv_material.tres" id="2_n2k6v"]
 [ext_resource type="PackedScene" uid="uid://dr1ueqoukcc13" path="res://Scripts/Player/Player.tscn" id="3_0hsah"]
+[ext_resource type="PackedScene" uid="uid://bsugam4hycyvy" path="res://Assets/Temp/TPose/passive_marker_man.dae" id="5_e4lmd"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_dgl7r"]
-size = Vector2(500, 500)
+size = Vector2(2000, 2000)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_dd2sg"]
-size = Vector3(500, 0.1, 500)
+size = Vector3(2000, 0.1, 2000)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_p2wrh"]
 
@@ -19,9 +20,6 @@ sky_material = SubResource("ProceduralSkyMaterial_p2wrh")
 [sub_resource type="Environment" id="Environment_5ihtt"]
 background_mode = 2
 sky = SubResource("Sky_wpbnd")
-
-[sub_resource type="BoxMesh" id="BoxMesh_ss6u5"]
-size = Vector3(0.2, 5, 0.2)
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_8p71n")
@@ -52,6 +50,4 @@ environment = SubResource("Environment_5ihtt")
 
 [node name="Player" parent="." instance=ExtResource("3_0hsah")]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-mesh = SubResource("BoxMesh_ss6u5")
+[node name="passive_marker_man" parent="." instance=ExtResource("5_e4lmd")]

@@ -20,22 +20,10 @@ public partial class PipeDetector : Area3D
         GlobalPosition = Global.Instance.GetMousePositionInWorld();
     }
 
-    public override void _PhysicsProcess(double delta)
-    {
-        IsAreaValid = (
-            !HasOverlappingAreas()
-            || GetOverlappingAreas().All(e => e.GetType() == typeof(PipeJoint) || e.GetType() == typeof(Pipe))
-        );
-    }
-
     public PipeJoint? GetClosestDetectedPipeJoint()
     {
         if (!HasOverlappingAreas()) return null;
-        var detectedPipeJoints = GetOverlappingAreas()
-            .Where(e => e.GetType() == typeof(PipeJoint))
-            .Select(e => (PipeJoint)e)
-            .ToArray();
-
+        var detectedPipeJoints = GetOverlappingAreas().OfType<PipeJoint>().ToArray();
         return NodeUtil.FindClosestNode(GlobalPosition, detectedPipeJoints);
     }
 

@@ -10,12 +10,19 @@ public delegate bool IsPlacementValidCallback();
 public partial class Building : Node3D
 {
     [Export] public Area3D CollisionArea = null!;
-    [Export] public MeshInstance3D[] MeshInstance3Ds { get; private set; } = Array.Empty<MeshInstance3D>();
+    [Export] public MeshInstance3D[] MeshInstances { get; private set; } = Array.Empty<MeshInstance3D>();
 
     public readonly List<IsPlacementValidCallback> IsPlacementValidCallbacks = new();
     private bool _isPlaced;
     public event Action? PlacedEvent;
 
+    public override void _Ready()
+    {
+        if (MeshInstances.Length == 0)
+        {
+            GD.PushError("MeshInstances is empty!");
+        }
+    }
 
     public bool IsPlacementValid()
     {

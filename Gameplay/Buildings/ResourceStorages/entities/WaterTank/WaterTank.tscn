@@ -18,8 +18,8 @@ radial_segments = 26
 rings = 1
 cap_bottom = false
 
-[node name="WaterTank" node_paths=PackedStringArray("MeshInstance3Ds") instance=ExtResource("1_8kdgs")]
-MeshInstance3Ds = [NodePath("MeshInstance3D")]
+[node name="WaterTank" node_paths=PackedStringArray("MeshInstances") instance=ExtResource("1_8kdgs")]
+MeshInstances = [NodePath("MeshInstance3D")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
@@ -45,13 +45,11 @@ outline_size = 10
 
 [node name="PipeInputConnector" parent="." index="4" instance=ExtResource("3_i7r71")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.791682, 0, -2.09734)
-_acceptedResources = Array[Resource]([ExtResource("2_dujo4")])
-FlowRate = 10.0
+_acceptedResource = ExtResource("2_dujo4")
 
 [node name="PipeOutputConnector" parent="." index="5" instance=ExtResource("4_6bmrt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.792, 0, -2.097)
-_acceptedResources = Array[Resource]([ExtResource("2_dujo4")])
-FlowRate = 10.0
+_acceptedResource = ExtResource("2_dujo4")
 
 [node name="LiquidResourceStorage" parent="." index="6" node_paths=PackedStringArray("_pipeInputConnectors", "_pipeOutputConnectors") instance=ExtResource("5_7cb1x")]
 _pipeInputConnectors = [NodePath("../PipeInputConnector")]

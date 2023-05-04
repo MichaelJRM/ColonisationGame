@@ -1,7 +1,4 @@
-﻿using System;
-using BaseBuilding.Scripts.WorldResources;
-
-namespace BaseBuilding.Scripts.Systems.EnergySystem.Wire;
+﻿namespace BaseBuilding.Scripts.Systems.EnergySystem.Wire;
 
 public partial class WireOutputConnector : WireConnector, IResourceOutputConnector
 {
@@ -12,13 +9,8 @@ public partial class WireOutputConnector : WireConnector, IResourceOutputConnect
         _resourceAskedCallback = resourceLineOutputConnector;
     }
 
-    public float AskForResource(WorldResource worldResource, float amountPerConnector)
+    public float AskForResource(float amountPerConnector)
     {
-        var isResourceAccepted = AcceptsResource(worldResource);
-        if (!isResourceAccepted)
-            throw new Exception(
-                $"Connector {Name} was asked for resource {worldResource.Name} which it does not accept"
-            );
         return _resourceAskedCallback.Invoke(amountPerConnector);
     }
 }

@@ -9,7 +9,7 @@ namespace BaseBuilding.Scripts.Systems.EnergySystem;
 
 public partial class WireJoint : Area3D, IResourceJoint
 {
-    [Export] private Label3D _debugLineIdLabel;
+    [Export] private Label3D _debugLineIdLabel = null!;
     [Export] protected uint MaxConnectionsAllowed = 10;
     [Export] public Marker3D WireOrigin { get; private set; } = null!;
 

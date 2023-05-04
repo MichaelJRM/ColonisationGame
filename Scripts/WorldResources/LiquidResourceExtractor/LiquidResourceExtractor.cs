@@ -4,13 +4,13 @@ using BaseBuilding.scripts.systems.BuildingSystem;
 using BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 using BaseBuilding.Scripts.Util;
 using Godot;
-using Godot.Collections;
 
 namespace BaseBuilding.Scripts.WorldResources.LiquidResourceExtractor;
 
 public partial class LiquidResourceExtractor : ResourceExtractor
 {
     [Export] private PipeOutputConnector[] _pipeOutputConnectors = System.Array.Empty<PipeOutputConnector>();
+
     private Area3D _resourceDetector = null!;
 
     public override void _Ready()
