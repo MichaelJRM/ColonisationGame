@@ -1,7 +1,8 @@
-﻿using System.Diagnostics;
+﻿using Godot;
 
 namespace BaseBuilding.Scripts.Systems.EnergySystem.Wire;
 
+[Tool]
 public partial class WireInputConnector : WireConnector, IResourceInputConnector
 {
     private OnResourceRequestedCallback? _onResourceRequestedCallback;

@@ -9,7 +9,6 @@ radius = 1.0
 [node name="WireConnector" type="Area3D" node_paths=PackedStringArray("_debugLineIdLabel", "WireOrigin")]
 collision_layer = 8
 collision_mask = 0
-monitoring = false
 script = ExtResource("1_ttg7t")
 _debugLineIdLabel = NodePath("DebugNode/LineId")
 WireOrigin = NodePath("WireOrigin")

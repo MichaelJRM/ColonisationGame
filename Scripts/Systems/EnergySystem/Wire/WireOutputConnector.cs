@@ -1,5 +1,8 @@
-﻿namespace BaseBuilding.Scripts.Systems.EnergySystem.Wire;
+﻿using Godot;
 
+namespace BaseBuilding.Scripts.Systems.EnergySystem.Wire;
+
+[Tool]
 public partial class WireOutputConnector : WireConnector, IResourceOutputConnector
 {
     private ResourceAskedCallback _resourceAskedCallback = null!;

@@ -1,5 +1,8 @@
-﻿namespace BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
+﻿using Godot;
 
+namespace BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
+
+[Tool]
 public partial class PipeInputConnector : PipeConnector, IResourceInputConnector
 {
     private OnResourceRequestedCallback? _onResourceRequestedCallback;

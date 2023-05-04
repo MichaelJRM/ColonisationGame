@@ -18,7 +18,6 @@ public partial class ResourceConverter : Node
     [Export] private Area3D[] _resourceInputConnectors = Array.Empty<Area3D>();
     IResourceInputConnector[] _iResourceInputConnectors = Array.Empty<IResourceInputConnector>();
     [Export] private Area3D[] _resourceOutputConnectors = Array.Empty<Area3D>();
-
     IResourceOutputConnector[] _iResourceOutputConnectors = Array.Empty<IResourceOutputConnector>();
 
     // ----------------------------------------------------------

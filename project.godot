@@ -18,7 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 GlobalWorldState="*res://Scripts/Util/GlobalWorldState.gd"
-PipeSystem="*res://Scripts/Systems/PipeSystem/PypeSystem.tscn"
+PipeSystem="*res://Scripts/Systems/PipeSystem/PipeSystem.tscn"
 Global="*res://Scripts/Singletons/Global.cs"
 BuildingDataBase="*res://Scripts/Systems/BuildingSystem/BuildingDataBase.cs"
 BuildingSystem="*res://Scripts/Systems/BuildingSystem/BuildingSystem.cs"

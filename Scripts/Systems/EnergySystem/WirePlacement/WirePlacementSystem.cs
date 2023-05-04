@@ -9,9 +9,7 @@ namespace BaseBuilding.Scripts.Systems.EnergySystem.WirePlacement;
 
 public partial class WirePlacementSystem : Node
 {
-    private readonly Action<OneOf<WireJoint, TemporaryWireJoint, Wire.WireConnector>[]>
-        _onPlace;
-
+    private readonly Action<OneOf<WireJoint, TemporaryWireJoint, Wire.WireConnector>[]> _onPlace;
     private OneOf<WireJoint, TemporaryWireJoint, Wire.WireConnector, None> _endJoint;
     private OneOf<WireJoint, TemporaryWireJoint, Wire.WireConnector, None> _startJoint;
     private Status _status = Status.PlacingStartJoint;
@@ -59,6 +57,7 @@ public partial class WirePlacementSystem : Node
                 {
                     _onPlace(_getAllJoints());
                 }
+
                 break;
         }
     }
@@ -94,7 +93,6 @@ public partial class WirePlacementSystem : Node
                 return;
         }
     }
-
 
     private void _calculateStartJoint()
     {

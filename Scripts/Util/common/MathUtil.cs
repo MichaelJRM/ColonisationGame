@@ -7,7 +7,7 @@ public static class MathUtil
 {
     public static Vector3 GetParallelPosition(Transform3D targetTransform, Vector3 sourcePosition)
     {
-        var direction = sourcePosition.DirectionTo(targetTransform.Origin);
+        var direction = sourcePosition - targetTransform.Origin;
         var parallelVector = direction.Project(-targetTransform.Basis.Z);
         var parallelPosition = targetTransform.Origin + parallelVector;
         return parallelPosition;

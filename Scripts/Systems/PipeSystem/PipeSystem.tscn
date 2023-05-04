@@ -1,0 +1,16 @@
+[gd_scene load_steps=7 format=3 uid="uid://c2wsm8xxh7n5u"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/PipeSystem/PipeSystem.cs" id="1_oga3q"]
+[ext_resource type="PackedScene" uid="uid://mduwhpoxrvev" path="res://Scripts/Systems/PipeSystem/PipeJoint.tscn" id="2_t4ovp"]
+[ext_resource type="PackedScene" uid="uid://db52uqgqi1jml" path="res://Scripts/Systems/PipeSystem/Pipe.tscn" id="3_w8x82"]
+[ext_resource type="PackedScene" uid="uid://chbj4yy5tmshj" path="res://Scripts/Systems/PipeSystem/TemporaryPipeJoint.tscn" id="4_un3mh"]
+[ext_resource type="PackedScene" uid="uid://cgx3olj1oisym" path="res://Scripts/Systems/PipeSystem/TemporaryPipe.tscn" id="5_1glvb"]
+[ext_resource type="ArrayMesh" uid="uid://bh6ame0fx4ecp" path="res://Assets/PipeSystem/PipeJoint/PipeJoint-bc1a844f0562d808849999f8491ff813_Cylinder_003.res" id="6_gt80q"]
+
+[node name="PipeSystem" type="Node3D"]
+script = ExtResource("1_oga3q")
+_pipeJointScene = ExtResource("2_t4ovp")
+_pipeScene = ExtResource("3_w8x82")
+_pipeTemporaryJointScene = ExtResource("4_un3mh")
+_temporaryPipeScene = ExtResource("5_1glvb")
+_pipeJointMesh = ExtResource("6_gt80q")

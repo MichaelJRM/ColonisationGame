@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using BaseBuilding.Scripts.Systems;
 using BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 using BaseBuilding.scripts.util.common;
@@ -7,9 +6,8 @@ using Godot;
 
 namespace BaseBuilding.scripts.systems.PipeSystem;
 
-public partial class PipeSystem : Node3D
+public sealed partial class PipeSystem : Node3D
 {
-    [Export] private PackedScene _pipeDetectorScene = null!;
     [Export] private PackedScene _pipeJointScene = null!;
     [Export] private PackedScene _pipeScene = null!;
     [Export] private PackedScene _pipeTemporaryJointScene = null!;
@@ -19,8 +17,32 @@ public partial class PipeSystem : Node3D
     private readonly ResourceLineManager<PipeJoint, PipeConnector> _pipeLineManager = new();
     private readonly ResourceLineRenderer _pipeLineRenderer = new();
     private bool _isEnabled;
-    private PipePlacer? _pipePlacer;
+    private Scripts.Systems.PipeSystem.PipePlacement.PipePlacerSystem? _pipePlacer;
 
+    private PipeSystem()
+    {
+    }
+
+    public static PipeSystem Instance { get; private set; } = null!;
+
+    public override void _Ready()
+    {
+        Instance = this;
+    }
+
+    public void RegisterPipeJoint(PipeJoint joint)
+    {
+        joint.PipeAddedEvent += OnPipeAdded;
+        joint.PipeRemovedEvent += OnPipeRemoved;
+        joint.TreeExiting += OnExitedTree;
+
+        void OnExitedTree()
+        {
+            joint.PipeAddedEvent -= OnPipeAdded;
+            joint.PipeRemovedEvent -= OnPipeRemoved;
+            joint.TreeExiting -= OnExitedTree;
+        }
+    }
 
     public override void _UnhandledKeyInput(InputEvent @event)
     {
@@ -50,10 +72,8 @@ public partial class PipeSystem : Node3D
 
     private void _initPipePlacer()
     {
-        _pipePlacer = new PipePlacer(
-            this,
+        _pipePlacer = new Scripts.Systems.PipeSystem.PipePlacement.PipePlacerSystem(
             _completePipePlacement,
-            _pipeDetectorScene,
             _pipeTemporaryJointScene,
             _temporaryPipeScene
         );
@@ -143,31 +163,12 @@ public partial class PipeSystem : Node3D
                         )
                     );
 
-                    void OnPipeAdded(Pipe pipe)
-                    {
-                        AddChild(pipe);
-                        pipe.SetRenderId(
-                            _pipeLineRenderer.AddLimb(
-                                GetWorld3D(),
-                                pipe.CreateMesh(true),
-                                pipe.GlobalTransform
-                            )
-                        );
-                    }
-
-                    void OnPipeRemoved(Pipe pipe)
-                    {
-                        _pipeLineRenderer.RemoveLimb(
-                            (uint)pipe.RenderId!,
-                            pipe.GlobalTransform
-                        );
-                        pipe.QueueFree();
-                    }
 
                     void OnJointRemoved()
                     {
                         joint.PipeAddedEvent -= OnPipeAdded;
                         joint.PipeRemovedEvent -= OnPipeRemoved;
+                        joint.TreeExited -= OnJointRemoved;
                     }
                 }
             }
@@ -178,6 +179,27 @@ public partial class PipeSystem : Node3D
             startPipeJoint.ConnectToJoint(endPipeJoint, _pipeScene);
             _pipeLineManager.Connect(startPipeJoint, endPipeJoint);
         }
+    }
+
+    void OnPipeAdded(Pipe pipe)
+    {
+        AddChild(pipe);
+        pipe.SetRenderId(
+            _pipeLineRenderer.AddLimb(
+                GetWorld3D(),
+                pipe.CreateMesh(true),
+                pipe.GlobalTransform
+            )
+        );
+    }
+
+    void OnPipeRemoved(Pipe pipe)
+    {
+        _pipeLineRenderer.RemoveLimb(
+            (uint)pipe.RenderId!,
+            pipe.GlobalTransform
+        );
+        pipe.QueueFree();
     }
 
 

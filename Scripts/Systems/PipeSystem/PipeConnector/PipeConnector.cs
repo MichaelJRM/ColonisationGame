@@ -1,28 +1,47 @@
+using System;
+using System.Collections.Generic;
 using BaseBuilding.scripts.systems.PipeSystem;
+using BaseBuilding.Scripts.Util.Extensions;
 using BaseBuilding.Scripts.WorldResources;
 using Godot;
 
 namespace BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 
+[Tool]
 public partial class PipeConnector : PipeJoint, IResourceConnector
 {
-    [Export] private WorldResource _acceptedResource = null!;
+    private Resource _resource = null!;
 
+    [Export]
+    private Resource Resource
+    {
+        get => _resource;
+        set
+        {
+            _resource = value;
+            UpdateConfigurationWarnings();
+        }
+    }
 
     public override void _Ready()
     {
+        if (Engine.IsEditorHint()) return;
+        _validate();
+        Monitoring = false;
         Monitorable = false;
-        if (_acceptedResource == null) GD.PushError("Accepted resource is not set!");
+        this.DisableColliders();
     }
 
     public void Activate()
     {
         Monitorable = true;
+        this.EnableColliders();
+        scripts.systems.PipeSystem.PipeSystem.Instance.RegisterPipeJoint(this);
     }
 
     public bool AcceptsResource(WorldResource worldResource)
     {
-        return _acceptedResource.Id == worldResource.Id;
+        return ((WorldResource)_resource).Id == worldResource.Id;
     }
 
     public object GetOwner()
@@ -32,6 +51,26 @@ public partial class PipeConnector : PipeJoint, IResourceConnector
 
     public WorldResource GetAcceptedResource()
     {
-        return _acceptedResource;
+        return (WorldResource)_resource;
+    }
+
+    private void _validate()
+    {
+        if (_resource == null)
+        {
+            throw new Exception("Resource is not set!");
+        }
+    }
+
+    public override string[] _GetConfigurationWarnings()
+    {
+        var warnings = new List<string>();
+
+        if (_resource == null)
+        {
+            warnings.Add("Resource is not set!");
+        }
+
+        return warnings.ToArray();
     }
 }
