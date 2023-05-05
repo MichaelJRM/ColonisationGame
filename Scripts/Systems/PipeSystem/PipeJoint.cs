@@ -12,7 +12,7 @@ public partial class PipeJoint : Area3D, IResourceJoint
     [Export] public uint MaxConnectionsAllowed { get; protected set; } = 8;
     [Export] protected float MinAngleBetweenLines;
     [Export] public uint MaxLimbs { get; protected set; } = 1;
-    [Export] public Mesh Mesh { get; protected set; } = null!;
+    [Export] public float MinDistanceBetweenJoints { get; protected set; } = 0f;
     [Export] public float MeshOriginOffset { get; protected set; }
 
     public readonly List<PipeJoint> ConnectedJoints = new();
@@ -103,7 +103,7 @@ public partial class PipeJoint : Area3D, IResourceJoint
     {
         var toPosition = endJoint.IsInsideTree() ? endJoint.GlobalPosition : endJoint.Position;
         var firstPipe = limbScene.Instantiate<Pipe>();
-        var pipeSize = firstPipe.CreateMesh(false, firstPipe.Length).GetAabb().Size;
+        var pipeSize = firstPipe.CreateMesh(firstPipe.Length).GetAabb().Size;
         firstPipe.QueueFree();
         var distance = startJoint.GlobalPosition.DistanceTo(toPosition);
         var count = Mathf.CeilToInt(distance / pipeSize.Z);

@@ -15,7 +15,13 @@ public partial class ResourceExtractor : Node3D
     [Export] private float _energyConsumptionPerExtraction = 1f;
     private double _gameTimeStamp;
     private ThrottledGenerator _throttledGenerator = null!;
-    protected ResourceDeposit.ResourceDeposit? ResourceDeposit;
+    protected ResourceDeposit.ResourceDeposit? ResourceDeposit { get; private set; }
+
+
+    protected void AssignResourceDeposit(ResourceDeposit.ResourceDeposit? resourceDeposit)
+    {
+        ResourceDeposit = resourceDeposit;
+    }
 
 
     public override void _Ready()
@@ -37,6 +43,11 @@ public partial class ResourceExtractor : Node3D
     protected float Extract(float amount)
     {
         if (ResourceDeposit == null) return 0f;
+        if (!_wireInputConnector.IsConnected())
+        {
+            // TODO: Display warning on user interface when there is no energy input
+            return 0f;
+        }
 
         var energyReceived = _wireInputConnector.RequestResource(_energyConsumptionPerExtraction);
         if (energyReceived < _energyConsumptionPerExtraction) return 0;

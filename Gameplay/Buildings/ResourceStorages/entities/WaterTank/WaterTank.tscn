@@ -15,26 +15,22 @@ radius = 7.45529
 [node name="WaterTank" node_paths=PackedStringArray("MeshInstances") instance=ExtResource("1_8kdgs")]
 MeshInstances = [NodePath("FuelStorage/FuelStorage")]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
-shape = SubResource("CylinderShape3D_3qe7q")
-
-[node name="LiquidResourceStorage" parent="." index="1" node_paths=PackedStringArray("DebugStorageLabel", "ResourceInputConnectors", "ResourceOutputConnectors") instance=ExtResource("5_7cb1x")]
+[node name="LiquidResourceStorage" parent="." index="0" node_paths=PackedStringArray("DebugStorageLabel", "ResourceInputConnectors", "ResourceOutputConnectors") instance=ExtResource("5_7cb1x")]
 DebugStorageLabel = NodePath("../DebugNode/Label3D")
 ResourceInputConnectors = [NodePath("../PipeInputConnector")]
 ResourceOutputConnectors = [NodePath("../PipeOutputConnector")]
 
-[node name="FuelStorage" parent="." index="2" instance=ExtResource("4_itmkp")]
+[node name="FuelStorage" parent="." index="1" instance=ExtResource("4_itmkp")]
 
-[node name="PipeOutputConnector" parent="." index="3" instance=ExtResource("4_6bmrt")]
+[node name="PipeOutputConnector" parent="." index="2" instance=ExtResource("4_6bmrt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.66731, 0.609942, 0.64366)
 Resource = ExtResource("5_kturk")
 
-[node name="PipeInputConnector" parent="." index="4" instance=ExtResource("3_i7r71")]
+[node name="PipeInputConnector" parent="." index="3" instance=ExtResource("3_i7r71")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.66813, 0.612877, -0.657772)
 Resource = ExtResource("5_kturk")
 
-[node name="DebugNode" parent="." index="5" instance=ExtResource("7_o0on4")]
+[node name="DebugNode" parent="." index="4" instance=ExtResource("7_o0on4")]
 
 [node name="Label3D" type="Label3D" parent="DebugNode" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19.4845, 0)
@@ -42,6 +38,10 @@ billboard = 1
 text = "adsadsadasd"
 font_size = 40
 outline_size = 10
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BuildingCollisionArea" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+shape = SubResource("CylinderShape3D_3qe7q")
 
 [editable path="FuelStorage"]
 [editable path="PipeOutputConnector"]

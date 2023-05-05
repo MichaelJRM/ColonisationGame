@@ -37,6 +37,11 @@ public partial class WireConnector : WireJoint, IResourceConnector
         this.EnableColliders();
     }
 
+    public bool IsConnected()
+    {
+        return ConnectedJoints.Count > 0;
+    }
+
     public bool AcceptsResource(WorldResource worldResource)
     {
         return worldResource.Id == ((WorldResource)_resource).Id;

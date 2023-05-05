@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://mduwhpoxrvev"]
+[gd_scene load_steps=3 format=3 uid="uid://mduwhpoxrvev"]
 
 [ext_resource type="Script" path="res://Scripts/Systems/PipeSystem/PipeJoint.cs" id="1_04cna"]
-[ext_resource type="ArrayMesh" uid="uid://bh6ame0fx4ecp" path="res://Assets/PipeSystem/PipeJoint/PipeJoint-bc1a844f0562d808849999f8491ff813_Cylinder_003.res" id="2_g560x"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_prawg"]
 radius = 0.4
@@ -13,8 +12,8 @@ monitoring = false
 script = ExtResource("1_04cna")
 MinAngleBetweenLines = 0.33
 MaxLimbs = 8
-Mesh = ExtResource("2_g560x")
-MeshOriginOffset = 0.16
+MinDistanceBetweenJoints = 0.6
+MeshOriginOffset = 0.17
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_prawg")

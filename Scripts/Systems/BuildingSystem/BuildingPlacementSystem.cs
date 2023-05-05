@@ -9,6 +9,12 @@ public partial class BuildingPlacementSystem : Node
     private Building? _preview;
     private BuildingResource? _resource;
     private StatusEnum _status = StatusEnum.Inactive;
+    private Node _context = null!;
+
+    public BuildingPlacementSystem(Node context)
+    {
+        _context = context;
+    }
 
     public override void _Ready()
     {
@@ -67,7 +73,7 @@ public partial class BuildingPlacementSystem : Node
         _preview.Position = Global.Instance.GetMousePositionInWorld();
         foreach (var previewMeshInstance in _preview.MeshInstances)
             previewMeshInstance.MaterialOverlay = _placementMaterial;
-        AddChild(_preview);
+        _context.AddChild(_preview);
         _status = StatusEnum.Placing;
         SetProcess(true);
         SetProcessUnhandledInput(true);

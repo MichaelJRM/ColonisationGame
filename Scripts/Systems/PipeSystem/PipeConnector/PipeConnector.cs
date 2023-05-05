@@ -39,6 +39,11 @@ public partial class PipeConnector : PipeJoint, IResourceConnector
         scripts.systems.PipeSystem.PipeSystem.Instance.RegisterPipeJoint(this);
     }
 
+    public bool IsConnected()
+    {
+        return ConnectedJoints.Count > 0;
+    }
+
     public bool AcceptsResource(WorldResource worldResource)
     {
         return ((WorldResource)_resource).Id == worldResource.Id;

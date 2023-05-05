@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=3 uid="uid://cl18532kcpf0t"]
 
-[ext_resource type="Script" path="res://World/World.gd" id="1_8p71n"]
+[ext_resource type="Script" path="res://Scripts/world/World.cs" id="1_eiggs"]
 [ext_resource type="PackedScene" uid="uid://bwslv5q00mylw" path="res://Gameplay/WorldResourceDeposits/entities/WaterDeposit.tscn" id="2_0mhrs"]
 [ext_resource type="Material" uid="uid://dc510q4aohars" path="res://Common/Materials/uvMaterial/uv_material.tres" id="2_n2k6v"]
 [ext_resource type="PackedScene" uid="uid://dr1ueqoukcc13" path="res://Scripts/Player/Player.tscn" id="3_0hsah"]
@@ -22,7 +22,7 @@ background_mode = 2
 sky = SubResource("Sky_wpbnd")
 
 [node name="World" type="Node3D"]
-script = ExtResource("1_8p71n")
+script = ExtResource("1_eiggs")
 
 [node name="WaterDeposit" parent="." instance=ExtResource("2_0mhrs")]
 

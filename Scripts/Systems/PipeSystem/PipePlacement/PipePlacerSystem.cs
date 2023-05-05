@@ -45,8 +45,7 @@ public partial class PipePlacerSystem : Node
         _temporaryPipeGenerator = new PipeGenerator(_temporaryPipeScene, () => IsPlacementValid);
         AddChild(_temporaryPipeGenerator);
         AddChild(_inputTick);
-        _inputTick.Pause();
-        _inputTick.SetTickRateInFps(60);
+        _inputTick.SetTickRateInFps(90);
         _inputTick.SetOnTick(_calculate);
     }
 

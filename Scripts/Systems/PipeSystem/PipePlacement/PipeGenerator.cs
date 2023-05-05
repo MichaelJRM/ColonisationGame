@@ -37,7 +37,7 @@ public partial class PipeGenerator : Node
     {
         base._Ready();
         var pipe = _temporaryPipeScene.Instantiate<TemporaryPipe>();
-        _pipeCommonMesh = pipe.CreateMesh(false, pipe.Length);
+        _pipeCommonMesh = pipe.CreateMesh(pipe.Length);
         _pipeSize = _pipeCommonMesh.GetAabb().Size;
         pipe.QueueFree();
     }

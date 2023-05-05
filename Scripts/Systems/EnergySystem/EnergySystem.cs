@@ -52,6 +52,7 @@ public partial class EnergySystem : Node3D
     private void _disposeWirePlacementSystem()
     {
         _wirePlacementSystem?.Disable();
+        _wirePlacementSystem?.Dispose();
         _wirePlacementSystem = null;
     }
 

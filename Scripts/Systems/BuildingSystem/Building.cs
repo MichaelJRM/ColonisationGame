@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BaseBuilding.Scripts.Util.Extensions;
+using BaseBuilding.Scripts.Systems.SaveSystem;
 using Godot;
-using Godot.Collections;
+
 
 namespace BaseBuilding.scripts.systems.BuildingSystem;
 
 public delegate bool IsPlacementValidCallback();
 
 [Tool]
-public partial class Building : Node3D
+public partial class Building : PersistentNode3D
 {
     private BuildingCollisionArea _collisionArea = null!;
-    private Array<MeshInstance3D> _meshInstances = new();
+    private Godot.Collections.Array<MeshInstance3D> _meshInstances = new();
 
 
     [Export]
-    public Array<MeshInstance3D> MeshInstances
+    public Godot.Collections.Array<MeshInstance3D> MeshInstances
     {
         get => _meshInstances;
         private set
@@ -46,12 +46,15 @@ public partial class Building : Node3D
     {
         if (Engine.IsEditorHint()) return;
         _validate();
+        if (LoadedFromSave)
+        {
+            OnPlaced();
+        }
     }
 
     public bool IsPlacementValid()
     {
         var buildingIsColliding = _collisionArea.HasOverlappingAreas();
-        var overlappingAreas = _collisionArea.GetOverlappingAreas();
         var isPlacementValid = IsPlacementValidCallbacks.All(e => e.Invoke());
         return !buildingIsColliding && isPlacementValid;
     }
@@ -92,5 +95,19 @@ public partial class Building : Node3D
         }
 
         return warnings.ToArray();
+    }
+
+    public override Dictionary<string, string> Save()
+    {
+        var saveData = new Dictionary<string, string>
+        {
+            { "GlobalTransform", GD.VarToStr(GlobalTransform) },
+        };
+        return saveData;
+    }
+
+    public override void Load(Dictionary<string, string> data)
+    {
+        GlobalTransform = (Transform3D)GD.StrToVar(data["GlobalTransform"]);
     }
 }

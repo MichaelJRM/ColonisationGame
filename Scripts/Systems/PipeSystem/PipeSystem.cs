@@ -187,7 +187,7 @@ public sealed partial class PipeSystem : Node3D
         pipe.SetRenderId(
             _pipeLineRenderer.AddLimb(
                 GetWorld3D(),
-                pipe.CreateMesh(true),
+                pipe.CreateMesh(),
                 pipe.GlobalTransform
             )
         );

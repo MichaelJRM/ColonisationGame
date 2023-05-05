@@ -3,6 +3,7 @@ using System.Linq;
 using BaseBuilding.scripts.systems.BuildingSystem;
 using BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 using BaseBuilding.Scripts.Util;
+using BaseBuilding.Scripts.Util.Extensions;
 using Godot;
 
 namespace BaseBuilding.Scripts.WorldResources.LiquidResourceExtractor;
@@ -11,7 +12,7 @@ public partial class LiquidResourceExtractor : ResourceExtractor
 {
     [Export] private PipeOutputConnector[] _pipeOutputConnectors = System.Array.Empty<PipeOutputConnector>();
 
-    private Area3D _resourceDetector = null!;
+    private Area3D? _resourceDetector;
 
     public override void _Ready()
     {
@@ -36,10 +37,14 @@ public partial class LiquidResourceExtractor : ResourceExtractor
         AddChild(_resourceDetector);
     }
 
-    private void _activate()
+    private async void _activate()
     {
-        _resourceDetector.QueueFree();
+        // Wait for the next frame so that the resource deposit detector has time to collect collision information in
+        // the case that we are loading from a save.
+        await this.WaitForNextFrame();
         _activatePipeConnectors();
+        _assignResourceDeposit();
+        _resourceDetector?.QueueFree();
     }
 
     private void _activatePipeConnectors()
@@ -62,10 +67,19 @@ public partial class LiquidResourceExtractor : ResourceExtractor
 
     private bool _doesHaveRequiredResource()
     {
-        var overlappingAreas = _resourceDetector.GetOverlappingAreas();
-        ResourceDeposit = (ResourceDeposit.ResourceDeposit?)overlappingAreas.FirstOrDefault(area =>
-            area is ResourceDeposit.ResourceDeposit deposit && deposit.Resource.Id == Resource.Id);
-        return ResourceDeposit != null;
+        var overlappingAreas = _resourceDetector!.GetOverlappingAreas();
+        return overlappingAreas.Any(
+            area => area is ResourceDeposit.ResourceDeposit deposit && deposit.Resource.Id == Resource.Id
+        );
+    }
+
+    private void _assignResourceDeposit()
+    {
+        var overlappingAreas = _resourceDetector!.GetOverlappingAreas();
+        var resourceDeposit = (ResourceDeposit.ResourceDeposit?)overlappingAreas.FirstOrDefault(
+            area => area is ResourceDeposit.ResourceDeposit deposit && deposit.Resource.Id == Resource.Id
+        );
+        AssignResourceDeposit(resourceDeposit);
     }
 
     public override void _ExitTree()

@@ -1,10 +1,12 @@
-﻿using Godot;
+﻿using System.Linq;
+using BaseBuilding.Scripts.Systems.SaveSystem;
+using Godot;
 
 namespace BaseBuilding.scripts.systems.BuildingSystem;
 
-public sealed partial class BuildingSystem : Node
+public sealed partial class BuildingSystem : Node, IPersistentManager
 {
-    private BuildingPlacementSystem _placementSystem = new();
+    private BuildingPlacementSystem _placementSystem = null!;
 
     private BuildingSystem()
     {
@@ -15,11 +17,28 @@ public sealed partial class BuildingSystem : Node
     public override void _Ready()
     {
         Instance = this;
+        _placementSystem = new(this);
         AddChild(_placementSystem);
     }
 
     public void StartBuildingPlacement(BuildingResource buildingResource)
     {
         _placementSystem.StartBuildingPlacement(buildingResource);
+    }
+
+
+    public void AddSaveChild(Node child)
+    {
+        AddChild(child);
+    }
+
+    public IPersistent[] GetPersistentChildren()
+    {
+        return GetChildren().OfType<IPersistent>().ToArray();
+    }
+
+    public string GetSavePath()
+    {
+        return "user://buildingSystem.save";
     }
 }

@@ -10,6 +10,8 @@ public interface IResourceConnector : IResourceJoint
 
     WorldResource GetAcceptedResource();
 
+    bool IsConnected();
+
     bool AcceptsResource(WorldResource worldResource);
 }
 
@@ -20,6 +22,10 @@ public delegate float OnResourceRequestedCallback(
 
 public interface IResourceInputConnector : IResourceConnector
 {
+    /// <summary>
+    /// Binds a callback to be called when this connector asks for a resource.
+    /// </summary>
+    /// <param name="onResourceRequestedCallback"></param>
     public void BindSource(OnResourceRequestedCallback onResourceRequestedCallback);
 
     public float RequestResource(float amount);
@@ -29,6 +35,11 @@ public delegate float ResourceAskedCallback(float amount);
 
 public interface IResourceOutputConnector : IResourceConnector
 {
+    /// <summary>
+    /// Bind a callback to be called when this connector is asked for a resource.
+    /// </summary>
+    /// <param name="resourceLineOutputConnector"></param>
     public void BindOnResourceAsked(ResourceAskedCallback resourceLineOutputConnector);
+
     public float AskForResource(float amount);
 }

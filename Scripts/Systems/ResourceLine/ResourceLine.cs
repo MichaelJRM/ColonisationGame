@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using BaseBuilding.Scripts.WorldResources;
+using Godot;
 
 namespace BaseBuilding.Scripts.Systems;
 
@@ -63,10 +63,15 @@ public class ResourceLine<TJoint, TConnector> where TJoint : IResourceJoint wher
         for (var i = 0; i < 5; i++)
         {
             var amountPerConnector = (amount - amountGathered) / connectorsWithResource.Length;
+            GD.Print("----------------------------------------");
+            GD.Print(inputConnector.GetOwner().GetType());
+            GD.Print($"amountPerConnector: {amountPerConnector}");
             foreach (var connector in connectorsWithResource)
             {
                 var gathered =
                     ((IResourceOutputConnector)connector).AskForResource(amountPerConnector);
+                GD.Print(connector.GetOwner().GetType());
+                GD.Print($"Amount gathered: {gathered}");
                 amountGathered += gathered;
             }
 
