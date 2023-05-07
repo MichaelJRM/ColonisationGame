@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using BaseBuilding.scripts.common;
-using BaseBuilding.Scripts.Systems;
 using Godot;
 
 namespace BaseBuilding.scripts.systems.PipeSystem;
@@ -12,9 +10,11 @@ public partial class Pipe : Area3D
     [Export] public BaseMaterial3D Material { get; private set; } = null!;
     [Export] public float Length { get; private set; } = 3.0f;
     public uint? RenderId { get; private set; }
-    public PipeJoint FrontJoint { get; private set; } = null!;
-    public PipeJoint BackJoint { get; private set; } = null!;
+    public ulong FrontJointId { get; private set; }
+    public ulong BackJointId { get; private set; }
     public CollisionShape3D CollisionShape = null!;
+    public PipeJoint FrontJoint => PipeSystem.Instance.GetPipeJoint(FrontJointId);
+    public PipeJoint BackJoint => PipeSystem.Instance.GetPipeJoint(BackJointId);
 
 
     public void SetRenderId(uint renderId)
@@ -36,19 +36,21 @@ public partial class Pipe : Area3D
 
     public bool CanCreateJointAtPosition(Vector3 globalPosition)
     {
-        var backDistance = BackJoint.GlobalPosition.DistanceTo(globalPosition);
-        var frontDistance = FrontJoint.GlobalPosition.DistanceTo(globalPosition);
-        var minDistanceBetweenJoints = BackJoint.MinDistanceBetweenJoints;
+        var backJoint = PipeSystem.Instance.GetPipeJoint(BackJointId);
+        var frontJoint = PipeSystem.Instance.GetPipeJoint(FrontJointId);
+        var backDistance = backJoint.GlobalPosition.DistanceTo(globalPosition);
+        var frontDistance = frontJoint.GlobalPosition.DistanceTo(globalPosition);
+        var minDistanceBetweenJoints = backJoint.MinDistanceBetweenJoints;
         return backDistance > minDistanceBetweenJoints && frontDistance > minDistanceBetweenJoints;
     }
 
     public void SetFrontJoint(PipeJoint pipeJoint)
     {
-        FrontJoint = pipeJoint;
+        FrontJointId = pipeJoint.Id;
     }
 
     public void SetBackJoint(PipeJoint pipeJoint)
     {
-        BackJoint = pipeJoint;
+        BackJointId = pipeJoint.Id;
     }
 }

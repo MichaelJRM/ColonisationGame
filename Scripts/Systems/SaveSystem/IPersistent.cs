@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Text.Json;
 using Godot;
 
 namespace BaseBuilding.Scripts.Systems.SaveSystem;
@@ -9,8 +9,8 @@ public interface IPersistent
     {
         var saveData = new Save
         {
-            SceneFilePath = GetSceneFilePath(),
-            Content = Save()
+            Sfp = GetSceneFilePath(),
+            C = Save()
         };
         var persistentChildren = GetPersistentChildren();
         var childrenSaveData = new Save[persistentChildren.Length];
@@ -21,7 +21,7 @@ public interface IPersistent
             childrenSaveData[i] = persistent.Serialize();
         }
 
-        saveData.Children = childrenSaveData;
+        saveData.Ch = childrenSaveData;
         return saveData;
     }
 
@@ -31,14 +31,15 @@ public interface IPersistent
 
     public static Node Deserialize(Save save)
     {
-        var scene = GD.Load<PackedScene>(save.SceneFilePath);
+        var scene = GD.Load<PackedScene>(save.Sfp);
         var instance = scene.Instantiate<Node>();
         var persistentInstance = (IPersistent)instance;
+        persistentInstance.ProcessContent((JsonElement)save.C);
         persistentInstance.BeforeLoad();
-        persistentInstance.Load(save.Content);
+        persistentInstance.Load();
         persistentInstance.AfterLoad();
 
-        var children = save.Children;
+        var children = save.Ch;
         foreach (var child in children)
         {
             var childInstance = Deserialize(child);
@@ -48,12 +49,15 @@ public interface IPersistent
         return instance;
     }
 
-    public Dictionary<string, string> Save();
+    protected void ProcessContent(JsonElement saveContent);
 
+    public object Save();
 
     public void BeforeLoad();
 
-    public void Load(Dictionary<string, string> data);
+    public void Load();
 
     public void AfterLoad();
+
+    public void ClearSaveContent();
 }

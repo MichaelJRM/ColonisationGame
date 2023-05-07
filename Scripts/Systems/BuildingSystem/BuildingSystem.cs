@@ -27,17 +27,17 @@ public sealed partial class BuildingSystem : Node, IPersistentManager
     }
 
 
-    public void AddSaveChild(Node child)
+    public void _AddSaveChild(Node child)
     {
         AddChild(child);
     }
 
-    public IPersistent[] GetPersistentChildren()
+    public IPersistent[] _GetPersistentChildren()
     {
         return GetChildren().OfType<IPersistent>().ToArray();
     }
 
-    public string GetSavePath()
+    public string _GetSavePath()
     {
         return "user://buildingSystem.save";
     }

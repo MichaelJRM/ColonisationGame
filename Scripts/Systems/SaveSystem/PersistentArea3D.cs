@@ -2,14 +2,12 @@
 using System.Text.Json;
 using Godot;
 
-
 namespace BaseBuilding.Scripts.Systems.SaveSystem;
 
-public abstract partial class PersistentNode<T> : Node, IPersistent
+public abstract partial class PersistentArea3D<T> : Area3D, IPersistent
 {
-    private ulong? Id { get; set; }
     protected bool LoadedFromSave = false;
-    public T SaveContent { get; private set; } = default!;
+    public T? SaveContent { get; private set; } = default!;
 
     public IPersistent[] GetPersistentChildren()
     {
@@ -42,6 +40,6 @@ public abstract partial class PersistentNode<T> : Node, IPersistent
 
     public void ClearSaveContent()
     {
-        throw new System.NotImplementedException();
+        SaveContent = default(T);
     }
 }

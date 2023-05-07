@@ -3,36 +3,43 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using BaseBuilding.Scripts.Systems;
+using BaseBuilding.Scripts.Systems.SaveSystem;
 using Godot;
 
 namespace BaseBuilding.scripts.systems.PipeSystem;
 
-public partial class PipeJoint : Area3D, IResourceJoint
+public partial class PipeJoint : PersistentArea3D<PipeJoint.SerializationData>, IResourceJoint
 {
     [Export] public uint MaxConnectionsAllowed { get; protected set; } = 8;
     [Export] protected float MinAngleBetweenLines;
-    [Export] public uint MaxLimbs { get; protected set; } = 1;
     [Export] public float MinDistanceBetweenJoints { get; protected set; } = 0f;
     [Export] public float MeshOriginOffset { get; protected set; }
+    [Export] private PackedScene _pipeScene = null!;
 
-    public readonly List<PipeJoint> ConnectedJoints = new();
-    public readonly List<Pipe> ConnectedPipes = new();
     public Pipe? OwnerPipe;
-    private uint? _lineId;
-    public uint? RenderId { get; private set; }
     public event Action<Pipe> PipeRemovedEvent = null!;
     public event Action<Pipe> PipeAddedEvent = null!;
-
+    public readonly List<ulong> ConnectedJointsIds = new();
+    public readonly List<Pipe> ConnectedPipes = new();
+    private uint? _lineId;
+    private uint? _renderId;
+    public ulong Id { get; private set; }
 
     public void SetRenderId(uint renderId)
     {
-        RenderId = renderId;
+        _renderId = renderId;
     }
 
     public void SetLineId(uint? lineId)
     {
         _lineId = lineId;
     }
+
+    public void SetId(ulong id)
+    {
+        Id = id;
+    }
+
 
     public uint? GetLineId()
     {
@@ -46,17 +53,18 @@ public partial class PipeJoint : Area3D, IResourceJoint
 
     public bool CanConnect()
     {
-        return ConnectedJoints.Count < MaxConnectionsAllowed;
+        return ConnectedJointsIds.Count < MaxConnectionsAllowed;
     }
 
     public bool CanConnectToJoint(PipeJoint other)
     {
         if (this == other) return false;
-        if (ConnectedJoints.Count >= MaxConnectionsAllowed) return false;
+        if (ConnectedJointsIds.Count >= MaxConnectionsAllowed) return false;
 
         var directionToJoint = GlobalPosition.DirectionTo(other.GlobalPosition);
-        foreach (var joint in CollectionsMarshal.AsSpan(ConnectedJoints))
+        foreach (var jointRid in CollectionsMarshal.AsSpan(ConnectedJointsIds))
         {
+            var joint = PipeSystem.Instance.GetPipeJoint(jointRid);
             var directionToConnectedJoint = GlobalPosition.DirectionTo(joint.GlobalPosition);
             var angleToNextJoint = directionToJoint.SignedAngleTo(directionToConnectedJoint, Basis.Y);
             if (Mathf.Abs(angleToNextJoint) < MinAngleBetweenLines) return false;
@@ -65,11 +73,13 @@ public partial class PipeJoint : Area3D, IResourceJoint
         return true;
     }
 
-    public void ConnectToJoint(PipeJoint endJoint, PackedScene pipeScene)
+    public void ConnectToJoint(PipeJoint endJoint)
     {
-        ConnectedJoints.Add(endJoint);
-        endJoint.ConnectedJoints.Add(this);
-        var newPipes = _createLimbsBetweenJoints(this, endJoint, pipeScene);
+        if (ConnectedJointsIds.Contains(endJoint.Id)) return;
+        ConnectedJointsIds.Add(endJoint.Id);
+        endJoint.ConnectedJointsIds.Add(Id);
+
+        var newPipes = _createLimbsBetweenJoints(this, endJoint, _pipeScene);
         foreach (var pipe in newPipes)
         {
             pipe.SetBackJoint(this);
@@ -81,14 +91,16 @@ public partial class PipeJoint : Area3D, IResourceJoint
         endJoint.ConnectedPipes.AddRange(newPipes);
     }
 
+
     public void DisconnectFromJoint(PipeJoint joint)
     {
-        var pipesBetweenJoints =
-            ConnectedPipes.Where(pipe => pipe.FrontJoint == joint || pipe.BackJoint == joint).ToArray();
+        var pipesBetweenJoints = ConnectedPipes
+            .Where(pipe => pipe.FrontJointId == joint.Id || pipe.BackJointId == joint.Id)
+            .ToArray();
         ConnectedPipes.RemoveAll(pipe => pipesBetweenJoints.Contains(pipe));
-        ConnectedJoints.Remove(joint);
+        ConnectedJointsIds.Remove(joint.Id);
         joint.ConnectedPipes.RemoveAll(pipe => pipesBetweenJoints.Contains(pipe));
-        joint.ConnectedJoints.Remove(this);
+        joint.ConnectedJointsIds.Remove(Id);
         foreach (var pipe in pipesBetweenJoints)
         {
             PipeRemovedEvent.Invoke(pipe);
@@ -141,5 +153,55 @@ public partial class PipeJoint : Area3D, IResourceJoint
         lastPipeCollisionShape.Height -= overflow;
         lastPipe.Transform = lastPipe.Transform.TranslatedLocal(new Vector3(0.0f, 0.0f, overflow * 0.5f));
         return pipes.ToArray();
+    }
+
+    public override object Save()
+    {
+        return new SerializationData(
+            id: Id,
+            gt: GD.VarToStr(GlobalTransform),
+            li: _lineId,
+            cj: ConnectedJointsIds.ToArray()
+        );
+    }
+
+    public override void Load()
+    {
+        Id = SaveContent.Id;
+        GlobalTransform = (Transform3D)GD.StrToVar(SaveContent.Gt);
+        _lineId = SaveContent.Li;
+    }
+
+
+    public class SerializationData
+    {
+        public SerializationData(ulong id, string gt, uint? li, ulong[] cj)
+        {
+            Id = id;
+            Gt = gt;
+            Li = li;
+            Cj = cj;
+        }
+
+        /// <summary>
+        /// Unique PipeJoint Id
+        /// </summary>
+        public ulong Id { get; set; }
+
+        /// <summary>
+        /// GlobalTransform
+        /// </summary>
+        public string Gt { get; set; }
+
+        /// <summary>
+        /// LineID
+        /// </summary>
+        public uint? Li { get; set; }
+
+
+        /// <summary>
+        /// ConnectedJointsIds
+        /// </summary>
+        public ulong[] Cj { get; set; }
     }
 }

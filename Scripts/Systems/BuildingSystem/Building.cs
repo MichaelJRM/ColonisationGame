@@ -10,7 +10,7 @@ namespace BaseBuilding.scripts.systems.BuildingSystem;
 public delegate bool IsPlacementValidCallback();
 
 [Tool]
-public partial class Building : PersistentNode3D
+public partial class Building : PersistentNode3D<Building.SerializationData>
 {
     private BuildingCollisionArea _collisionArea = null!;
     private Godot.Collections.Array<MeshInstance3D> _meshInstances = new();
@@ -97,17 +97,27 @@ public partial class Building : PersistentNode3D
         return warnings.ToArray();
     }
 
-    public override Dictionary<string, string> Save()
+
+    public override object Save()
     {
-        var saveData = new Dictionary<string, string>
-        {
-            { "GlobalTransform", GD.VarToStr(GlobalTransform) },
-        };
-        return saveData;
+        return new SerializationData(gt: GD.VarToStr(GlobalTransform));
     }
 
-    public override void Load(Dictionary<string, string> data)
+    public override void Load()
     {
-        GlobalTransform = (Transform3D)GD.StrToVar(data["GlobalTransform"]);
+        GlobalTransform = (Transform3D)GD.StrToVar(SaveContent.Gt);
+    }
+
+    public class SerializationData
+    {
+        public SerializationData(string gt)
+        {
+            Gt = gt;
+        }
+
+        /// <summary>
+        /// GlobalTransform
+        /// </summary>
+        public string Gt { get; }
     }
 }

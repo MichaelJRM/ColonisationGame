@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Text.Json;
 using Godot;
 
 
 namespace BaseBuilding.Scripts.Systems.SaveSystem;
 
-public abstract partial class PersistentNode3D : Node3D, IPersistent
+public abstract partial class PersistentNode3D<T> : Node3D, IPersistent
 {
+    private ulong? Id { get; set; }
     protected bool LoadedFromSave = false;
+    protected T? SaveContent { get; private set; } = default!;
 
     public IPersistent[] GetPersistentChildren()
     {
@@ -19,17 +21,27 @@ public abstract partial class PersistentNode3D : Node3D, IPersistent
         return SceneFilePath;
     }
 
+    public void ProcessContent(JsonElement saveContent)
+    {
+        SaveContent = saveContent.Deserialize<T>()!;
+    }
 
-    public abstract Dictionary<string, string> Save();
+    public abstract object Save();
 
     public void BeforeLoad()
     {
         LoadedFromSave = true;
     }
 
-    public abstract void Load(Dictionary<string, string> data);
+    public abstract void Load();
+
 
     public void AfterLoad()
     {
+    }
+
+    public void ClearSaveContent()
+    {
+        SaveContent = default(T);
     }
 }

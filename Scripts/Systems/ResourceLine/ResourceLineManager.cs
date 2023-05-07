@@ -14,6 +14,7 @@ public class ResourceLineManager<TJoint, TConnector> where TJoint : IResourceJoi
         return _lineIdCounter++;
     }
 
+
     public void AddJoint(uint lineId, TJoint joint)
     {
         var resourceLine = _lines[lineId];
@@ -53,27 +54,27 @@ public class ResourceLineManager<TJoint, TConnector> where TJoint : IResourceJoi
         if (!first.IsConnectedToLine() && !second.IsConnectedToLine())
         {
             var pipeLineId = CreateLine();
-            _addBasedOnType(pipeLineId, first);
-            _addBasedOnType(pipeLineId, second);
+            AddBasedOnType(pipeLineId, first);
+            AddBasedOnType(pipeLineId, second);
             return;
         }
 
         if (first.IsConnectedToLine())
         {
             var pipeLineId = (uint)first.GetLineId()!;
-            _addBasedOnType(pipeLineId, second);
+            AddBasedOnType(pipeLineId, second);
             return;
         }
 
         if (!first.IsConnectedToLine())
         {
             var pipeLineId = (uint)second.GetLineId()!;
-            _addBasedOnType(pipeLineId, first);
+            AddBasedOnType(pipeLineId, first);
             return;
         }
     }
 
-    private void _addBasedOnType(uint lineId, TJoint joint)
+    public void AddBasedOnType(uint lineId, TJoint joint)
     {
         if (joint is TConnector connector)
         {
@@ -83,5 +84,12 @@ public class ResourceLineManager<TJoint, TConnector> where TJoint : IResourceJoi
         {
             AddJoint(lineId, joint);
         }
+    }
+
+    public void CreateLine(uint lineId)
+    {
+        var line = new ResourceLine<TJoint, TConnector>(lineId);
+        _lines.Add(lineId, line);
+        if (lineId >= _lineIdCounter) _lineIdCounter = lineId + 1;
     }
 }

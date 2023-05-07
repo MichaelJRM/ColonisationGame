@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using BaseBuilding.Scripts.Systems;
 using BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
+using BaseBuilding.Scripts.Systems.SaveSystem;
 using BaseBuilding.scripts.util.common;
 using Godot;
 
 namespace BaseBuilding.scripts.systems.PipeSystem;
 
-public sealed partial class PipeSystem : Node3D
+public sealed partial class PipeSystem : Node3D, IPersistentManager
 {
     [Export] private PackedScene _pipeJointScene = null!;
     [Export] private PackedScene _pipeScene = null!;
@@ -15,9 +18,11 @@ public sealed partial class PipeSystem : Node3D
     [Export] private Mesh _pipeJointMesh = null!;
 
     private readonly ResourceLineManager<PipeJoint, PipeConnector> _pipeLineManager = new();
-    private readonly ResourceLineRenderer _pipeLineRenderer = new();
+    private readonly ResourceLineRenderingManager _pipeLineRenderingManager = new();
     private bool _isEnabled;
     private Scripts.Systems.PipeSystem.PipePlacement.PipePlacerSystem? _pipePlacer;
+    private readonly Dictionary<ulong, PipeJoint> _pipeJoints = new();
+    private ulong _universalJointIdCounter;
 
     private PipeSystem()
     {
@@ -28,18 +33,21 @@ public sealed partial class PipeSystem : Node3D
     public override void _Ready()
     {
         Instance = this;
+        AddChild(_pipeLineRenderingManager);
     }
+
+    public PipeJoint GetPipeJoint(ulong id) => _pipeJoints[id];
 
     public void RegisterPipeJoint(PipeJoint joint)
     {
-        joint.PipeAddedEvent += OnPipeAdded;
-        joint.PipeRemovedEvent += OnPipeRemoved;
+        joint.PipeAddedEvent += _onPipeAdded;
+        joint.PipeRemovedEvent += _OnPipeRemoved;
         joint.TreeExiting += OnExitedTree;
 
         void OnExitedTree()
         {
-            joint.PipeAddedEvent -= OnPipeAdded;
-            joint.PipeRemovedEvent -= OnPipeRemoved;
+            joint.PipeAddedEvent -= _onPipeAdded;
+            joint.PipeRemovedEvent -= _OnPipeRemoved;
             joint.TreeExiting -= OnExitedTree;
         }
     }
@@ -130,62 +138,71 @@ public sealed partial class PipeSystem : Node3D
                 PipeJoint CreatePermanentPipeJointAtPosition(Vector3 globalPosition)
                 {
                     var instance = _pipeJointScene.Instantiate<PipeJoint>();
+                    instance.SetId(GetNewJointId());
                     instance.Position = globalPosition;
-                    CommitPipeJoint(instance);
+                    _commitPipeJoint(instance);
+                    _sentJointToRenderingManager(instance);
                     return instance;
                 }
 
                 PipeJoint CreatePermanentPipeJointOnPipe(Pipe pipe, Vector3 globalPosition)
                 {
                     var instance = _pipeJointScene.Instantiate<PipeJoint>();
+                    instance.SetId(GetNewJointId());
                     instance.OwnerPipe = pipe;
                     instance.Position = MathUtil.GetParallelPosition(pipe.GlobalTransform, globalPosition);
-                    CommitPipeJoint(instance);
+                    _commitPipeJoint(instance);
+                    _sentJointToRenderingManager(instance);
                     pipe.FrontJoint.DisconnectFromJoint(pipe.BackJoint);
-                    pipe.BackJoint.ConnectToJoint(instance, _pipeScene);
-                    pipe.FrontJoint.ConnectToJoint(instance, _pipeScene);
+                    pipe.BackJoint.ConnectToJoint(instance);
+                    pipe.FrontJoint.ConnectToJoint(instance);
                     var pipeLineId = (uint)(pipe.BackJoint.GetLineId() ?? pipe.FrontJoint.GetLineId())!;
                     _pipeLineManager.AddJoint(pipeLineId, instance);
                     return instance;
-                }
-
-                void CommitPipeJoint(PipeJoint joint)
-                {
-                    joint.PipeAddedEvent += OnPipeAdded;
-                    joint.PipeRemovedEvent += OnPipeRemoved;
-                    joint.TreeExited += OnJointRemoved;
-                    AddChild(joint);
-                    joint.SetRenderId(
-                        _pipeLineRenderer.AddJoint(
-                            GetWorld3D(),
-                            _pipeJointMesh,
-                            joint.GlobalTransform.TranslatedLocal(new Vector3(0.0f, joint.MeshOriginOffset, 0.0f))
-                        )
-                    );
-
-
-                    void OnJointRemoved()
-                    {
-                        joint.PipeAddedEvent -= OnPipeAdded;
-                        joint.PipeRemovedEvent -= OnPipeRemoved;
-                        joint.TreeExited -= OnJointRemoved;
-                    }
                 }
             }
         }
 
         void ConnectJoints(PipeJoint startPipeJoint, PipeJoint endPipeJoint)
         {
-            startPipeJoint.ConnectToJoint(endPipeJoint, _pipeScene);
+            startPipeJoint.ConnectToJoint(endPipeJoint);
             _pipeLineManager.Connect(startPipeJoint, endPipeJoint);
         }
     }
 
-    void OnPipeAdded(Pipe pipe)
+    private void _commitPipeJoint(PipeJoint joint)
+    {
+        joint.PipeAddedEvent += _onPipeAdded;
+        joint.PipeRemovedEvent += _OnPipeRemoved;
+        joint.TreeExited += OnJointRemoved;
+        AddChild(joint);
+        _pipeJoints.Add(joint.Id, joint);
+
+
+        void OnJointRemoved()
+        {
+            joint.PipeAddedEvent -= _onPipeAdded;
+            joint.PipeRemovedEvent -= _OnPipeRemoved;
+            joint.TreeExited -= OnJointRemoved;
+        }
+    }
+
+    private void _sentJointToRenderingManager(PipeJoint joint)
+    {
+        joint.SetRenderId(
+            _pipeLineRenderingManager.AddJoint(
+                GetWorld3D(),
+                _pipeJointMesh,
+                joint.GlobalTransform.TranslatedLocal(new Vector3(0.0f, joint.MeshOriginOffset, 0.0f))
+            )
+        );
+    }
+
+    private void _onPipeAdded(Pipe pipe)
     {
         AddChild(pipe);
         pipe.SetRenderId(
-            _pipeLineRenderer.AddLimb(
+            _pipeLineRenderingManager.AddLimb(
                 GetWorld3D(),
                 pipe.CreateMesh(),
                 pipe.GlobalTransform
@@ -193,9 +210,9 @@ public sealed partial class PipeSystem : Node3D
         );
     }
 
-    void OnPipeRemoved(Pipe pipe)
+    private void _OnPipeRemoved(Pipe pipe)
     {
-        _pipeLineRenderer.RemoveLimb(
+        _pipeLineRenderingManager.RemoveLimb(
             (uint)pipe.RenderId!,
             pipe.GlobalTransform
         );
@@ -205,6 +222,56 @@ public sealed partial class PipeSystem : Node3D
 
     public override void _ExitTree()
     {
-        _pipeLineRenderer.Clean();
+        _pipeLineRenderingManager.Clean();
+    }
+
+    public void _AddSaveChild(Node child)
+    {
+        switch (child)
+        {
+            case PipeJoint pipeJoint:
+                _commitPipeJoint(pipeJoint);
+                _sentJointToRenderingManager(pipeJoint);
+                break;
+        }
+    }
+
+    public IPersistent[] _GetPersistentChildren()
+    {
+        return _pipeJoints.Values.ToArray();
+    }
+
+    public string _GetSavePath()
+    {
+        return "user://pipeSystem.save";
+    }
+
+    public void _AfterLoad()
+    {
+        var largestId = _pipeJoints.MaxBy(e => e.Value.Id).Value.Id;
+        _universalJointIdCounter = largestId + 1;
+        var groupedJoints = _pipeJoints.Values.GroupBy(joint => joint.GetLineId()).ToArray();
+
+        foreach (var group in groupedJoints)
+        {
+            var lineId = (uint)group.Key!;
+            _pipeLineManager.CreateLine(lineId);
+
+            foreach (var pipeJoint in group)
+            {
+                var connectedJointsIds = pipeJoint.SaveContent.Cj;
+                foreach (var connectedJointId in connectedJointsIds)
+                {
+                    pipeJoint.ConnectToJoint(GetPipeJoint(connectedJointId));
+                }
+
+                _pipeLineManager.AddBasedOnType(lineId, pipeJoint);
+            }
+        }
+    }
+
+    public ulong GetNewJointId()
+    {
+        return _universalJointIdCounter++;
     }
 }

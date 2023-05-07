@@ -23,6 +23,7 @@ public partial class PipeConnector : PipeJoint, IResourceConnector
         }
     }
 
+
     public override void _Ready()
     {
         if (Engine.IsEditorHint()) return;
@@ -41,7 +42,7 @@ public partial class PipeConnector : PipeJoint, IResourceConnector
 
     public bool IsConnected()
     {
-        return ConnectedJoints.Count > 0;
+        return ConnectedJointsIds.Count > 0;
     }
 
     public bool AcceptsResource(WorldResource worldResource)

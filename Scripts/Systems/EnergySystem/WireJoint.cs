@@ -45,6 +45,11 @@ public partial class WireJoint : Area3D, IResourceJoint
         return ConnectedJoints.Count < MaxConnectionsAllowed;
     }
 
+    public void SetId(ulong id)
+    {
+        throw new System.NotImplementedException();
+    }
+
     public void ConnectToJoint(WireJoint joint)
     {
         ConnectedJoints.Add(joint);

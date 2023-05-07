@@ -7,6 +7,7 @@ public partial class PipeInputConnector : PipeConnector, IResourceInputConnector
 {
     private OnResourceRequestedCallback? _onResourceRequestedCallback;
 
+
     public void BindSource(OnResourceRequestedCallback onResourceRequestedCallback)
     {
         _onResourceRequestedCallback = onResourceRequestedCallback;
