@@ -98,8 +98,8 @@ public partial class PipePlacerSystem : Node
                 var updated = _calculateEndJoint();
                 if (!updated) return;
 
-                _calculateIfPlacementIsValid();
                 _calculateIntermediateJoints();
+                _calculateIfPlacementIsValid();
                 if (_startJoint != null && _endJoint != null)
                     _temporaryPipeGenerator.Update(_startJoint!.GlobalTransform, _endJoint!.GlobalTransform);
 
@@ -162,12 +162,13 @@ public partial class PipePlacerSystem : Node
             var newJoint = _createTemporaryJointOnPipe(closestDetectedPipe, _pipeDetector.GlobalPosition);
             if (_endJoint is TemporaryPipeJoint) _endJoint.QueueFree();
             _endJoint = newJoint;
-            return false;
+            return true;
         }
 
         if (_endJoint is TemporaryPipeJoint temporaryJoint)
         {
             temporaryJoint.OwnerPipe = null;
+            temporaryJoint.ConnectedPipes.Clear();
             temporaryJoint.GlobalPosition = _pipeDetector.GlobalPosition;
         }
         else
@@ -180,14 +181,6 @@ public partial class PipePlacerSystem : Node
 
     private void _calculateIfPlacementIsValid()
     {
-        // var overlappingAreas = _pipeDetector.GetOverlappingAreas();
-        // var isColliding = overlappingAreas.Any(e => e is not PipeJoint && e is not Pipe);
-        // if (isColliding)
-        // {
-        //     IsPlacementValid = false;
-        //     return;
-        // }
-
         var isPipePlacementValid = _temporaryPipeGenerator.IsPlacementValid;
         if (!isPipePlacementValid)
         {
@@ -219,30 +212,12 @@ public partial class PipePlacerSystem : Node
             joint.GlobalPosition = new Vector3(0.0f, -1000.0f, 0.0f);
         }
 
-        if (!_areJointsValid) return;
         _intermediateJoints.Clear();
 
-        var snap = new Vector3(0.01f, 0.01f, 0.01f);
-        var intersectingPipes = _temporaryPipeGenerator.GetIntersectingPipes();
-        if (intersectingPipes.Count > 0)
-        {
-            var removeFirst = intersectingPipes.First().Item2.Snapped(snap) ==
-                              _startJoint!.GlobalPosition.Snapped(snap);
-            if (intersectingPipes.Count > 1)
-            {
-                var removeLast = intersectingPipes.Last().Item2.Snapped(snap) ==
-                                 _endJoint!.GlobalPosition.Snapped(snap);
-                if (removeLast) intersectingPipes.RemoveAt(intersectingPipes.Count - 1);
-            }
-
-            if (removeFirst) intersectingPipes.RemoveAt(0);
-        }
-
+        var intersectionPoints = _calculatePointsOfIntersectionWithPipes(_temporaryPipeGenerator.GetPipes());
         var pollJointIndex = _intermediateJointsPoll.Count - 1;
-        foreach (var (pipe, intersectionGlobalPosition) in CollectionsMarshal.AsSpan(intersectingPipes))
+        foreach (var (pipe, intersectionGlobalPosition) in CollectionsMarshal.AsSpan(intersectionPoints))
         {
-            if (!pipe.CanCreateJointAtPosition(intersectionGlobalPosition)) continue;
-
             if (pollJointIndex >= 0)
             {
                 var pollJoint = _intermediateJointsPoll[pollJointIndex];
@@ -261,11 +236,47 @@ public partial class PipePlacerSystem : Node
         }
     }
 
+    private List<(Pipe, Vector3)> _calculatePointsOfIntersectionWithPipes(List<TemporaryPipe> pipes)
+    {
+        var intersections = new List<(Pipe, Vector3)>();
+        var overlappingPipes = new List<Pipe>();
+        foreach (var temporaryPipe in CollectionsMarshal.AsSpan(pipes))
+        {
+            overlappingPipes.Clear();
+            overlappingPipes.AddRange(temporaryPipe.GetOverlappingAreas().OfType<Pipe>());
+            foreach (var overlappingPipe in CollectionsMarshal.AsSpan(overlappingPipes))
+            {
+                if (_startJoint!.ConnectedPipes.Contains(overlappingPipe)) continue;
+                if (_endJoint.ConnectedPipes.Contains(overlappingPipe)) continue;
+                if (intersections.Any(e => e.Item1 == overlappingPipe)) continue;
+                var intersectionPoint = MathUtil.CalculateIntersectionPoint(
+                    overlappingPipe.GlobalTransform,
+                    temporaryPipe.GlobalTransform
+                );
+                if (intersections.Count != 0 && intersectionPoint.DistanceSquaredTo(intersections.Last().Item2) < 0.6f)
+                {
+                    continue;
+                }
+
+                var pipeLength = ((CylinderShape3D)overlappingPipe.CollisionShape.Shape).Height;
+                if (!(overlappingPipe.GlobalPosition.DistanceTo(intersectionPoint) <= pipeLength) ||
+                    !overlappingPipe.CanCreateJointAtPosition(intersectionPoint)) continue;
+
+                intersections.Add((overlappingPipe, intersectionPoint));
+            }
+        }
+
+        return intersections;
+    }
+
     private TemporaryPipeJoint _createTemporaryJointOnPipe(Pipe pipe, Vector3 globalPosition)
     {
         var pipeJoint = _temporaryJointScene.Instantiate<TemporaryPipeJoint>();
         pipeJoint.Position = MathUtil.GetParallelPosition(pipe.GlobalTransform, globalPosition);
         pipeJoint.OwnerPipe = pipe;
+        pipeJoint.ConnectedPipes.AddRange(pipe.BackJoint.ConnectedPipes.Intersect(pipe.FrontJoint.ConnectedPipes));
+        pipeJoint.ConnectedJointsIds.Add(pipe.BackJoint.Eid);
+        pipeJoint.ConnectedJointsIds.Add(pipe.FrontJoint.Eid);
         AddChild(pipeJoint);
         return pipeJoint;
     }

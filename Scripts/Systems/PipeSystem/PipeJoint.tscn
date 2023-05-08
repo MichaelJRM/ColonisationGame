@@ -12,7 +12,7 @@ collision_mask = 0
 monitoring = false
 script = ExtResource("1_04cna")
 MinAngleBetweenLines = 0.33
-MinDistanceBetweenJoints = 0.6
+MinDistanceBetweenJointsSquared = 0.6
 MeshOriginOffset = 0.17
 _pipeScene = ExtResource("2_cy1me")
 

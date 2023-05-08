@@ -10,5 +10,6 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="OneOf" Version="3.0.243" />
+        <PackageReference Include="protobuf-net" Version="3.2.16" />
     </ItemGroup>
 </Project>

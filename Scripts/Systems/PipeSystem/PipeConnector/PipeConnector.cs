@@ -23,7 +23,6 @@ public partial class PipeConnector : PipeJoint, IResourceConnector
         }
     }
 
-
     public override void _Ready()
     {
         if (Engine.IsEditorHint()) return;
@@ -37,7 +36,12 @@ public partial class PipeConnector : PipeJoint, IResourceConnector
     {
         Monitorable = true;
         this.EnableColliders();
-        scripts.systems.PipeSystem.PipeSystem.Instance.RegisterPipeJoint(this);
+
+        if (!LoadedFromSave)
+        {
+            Eid = scripts.systems.PipeSystem.PipeSystem.Instance.GetNewJointEid();
+            scripts.systems.PipeSystem.PipeSystem.Instance.RegisterPipeConnector(this);
+        }
     }
 
     public bool IsConnected()
@@ -52,7 +56,7 @@ public partial class PipeConnector : PipeJoint, IResourceConnector
 
     public object GetOwner()
     {
-        return Owner;
+        return GetParent();
     }
 
     public WorldResource GetAcceptedResource()
@@ -79,4 +83,14 @@ public partial class PipeConnector : PipeJoint, IResourceConnector
 
         return warnings.ToArray();
     }
+
+    public override void Load()
+    {
+        Eid = SaveContent!.Eid;
+        LineId = SaveContent.Li;
+        ConnectedJointsIds.AddRange(SaveContent.Cj);
+        scripts.systems.PipeSystem.PipeSystem.Instance.RegisterPipeConnector(this);
+    }
+
+    public override bool InstantiateOnLoad() => false;
 }

@@ -17,8 +17,7 @@ public class ThrottledGenerator
     {
         var timeSinceLastGeneration = (float)(gameTimeInSeconds - _lastGenerationTimestamp);
         _lastGenerationTimestamp = gameTimeInSeconds;
-        var remainingGenerationPercentage = Mathf.Min(timeSinceLastGeneration / _generationRatePerGameSecond, 1.0f);
-        var amountAvailable = _generationRatePerGameSecond * remainingGenerationPercentage;
+        var amountAvailable = timeSinceLastGeneration * _generationRatePerGameSecond;
         var amountToReturn = Mathf.Min(amount, amountAvailable);
         return amountToReturn;
     }

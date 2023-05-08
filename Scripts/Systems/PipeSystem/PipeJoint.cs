@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using BaseBuilding.Scripts.Systems;
 using BaseBuilding.Scripts.Systems.SaveSystem;
+using BaseBuilding.Scripts.Util.objects;
 using Godot;
 
 namespace BaseBuilding.scripts.systems.PipeSystem;
@@ -12,18 +13,18 @@ public partial class PipeJoint : PersistentArea3D<PipeJoint.SerializationData>, 
 {
     [Export] public uint MaxConnectionsAllowed { get; protected set; } = 8;
     [Export] protected float MinAngleBetweenLines;
-    [Export] public float MinDistanceBetweenJoints { get; protected set; } = 0f;
+    [Export] public float MinDistanceBetweenJointsSquared { get; protected set; } = 0f;
     [Export] public float MeshOriginOffset { get; protected set; }
     [Export] private PackedScene _pipeScene = null!;
 
     public Pipe? OwnerPipe;
     public event Action<Pipe> PipeRemovedEvent = null!;
     public event Action<Pipe> PipeAddedEvent = null!;
-    public readonly List<ulong> ConnectedJointsIds = new();
+    public readonly List<Eid> ConnectedJointsIds = new();
     public readonly List<Pipe> ConnectedPipes = new();
-    private uint? _lineId;
+    protected uint? LineId;
     private uint? _renderId;
-    public ulong Id { get; private set; }
+    public Eid Eid { get; protected set; }
 
     public void SetRenderId(uint renderId)
     {
@@ -32,23 +33,22 @@ public partial class PipeJoint : PersistentArea3D<PipeJoint.SerializationData>, 
 
     public void SetLineId(uint? lineId)
     {
-        _lineId = lineId;
+        LineId = lineId;
     }
-
-    public void SetId(ulong id)
-    {
-        Id = id;
-    }
-
 
     public uint? GetLineId()
     {
-        return _lineId;
+        return LineId;
+    }
+
+    public void SetId(Eid id)
+    {
+        Eid = id;
     }
 
     public bool IsConnectedToLine()
     {
-        return _lineId != null;
+        return LineId != null;
     }
 
     public bool CanConnect()
@@ -73,34 +73,44 @@ public partial class PipeJoint : PersistentArea3D<PipeJoint.SerializationData>, 
         return true;
     }
 
-    public void ConnectToJoint(PipeJoint endJoint)
+    public void ConnectToJoint(PipeJoint other)
     {
-        if (ConnectedJointsIds.Contains(endJoint.Id)) return;
-        ConnectedJointsIds.Add(endJoint.Id);
-        endJoint.ConnectedJointsIds.Add(Id);
+        if (!other.Eid.IsValid) throw new Exception("Other joint Eid is not valid!");
 
-        var newPipes = _createLimbsBetweenJoints(this, endJoint, _pipeScene);
+        if (ConnectedJointsIds.Contains(other.Eid)) return;
+        ConnectedJointsIds.Add(other.Eid);
+        other.ConnectedJointsIds.Add(Eid);
+
+        CreatePipesBetweenJoints(other);
+    }
+
+
+    public void CreatePipesBetweenJoints(PipeJoint other)
+    {
+        if (!other.Eid.IsValid) throw new Exception("Other joint Eid is not valid!");
+
+        var newPipes = _createLimbsBetweenJoints(this, other, _pipeScene);
         foreach (var pipe in newPipes)
         {
             pipe.SetBackJoint(this);
-            pipe.SetFrontJoint(endJoint);
+            pipe.SetFrontJoint(other);
             PipeAddedEvent.Invoke(pipe);
         }
 
         ConnectedPipes.AddRange(newPipes);
-        endJoint.ConnectedPipes.AddRange(newPipes);
+        other.ConnectedPipes.AddRange(newPipes);
     }
 
 
     public void DisconnectFromJoint(PipeJoint joint)
     {
         var pipesBetweenJoints = ConnectedPipes
-            .Where(pipe => pipe.FrontJointId == joint.Id || pipe.BackJointId == joint.Id)
+            .Where(pipe => pipe.FrontJoint.Eid == joint.Eid || pipe.BackJoint.Eid == joint.Eid)
             .ToArray();
         ConnectedPipes.RemoveAll(pipe => pipesBetweenJoints.Contains(pipe));
-        ConnectedJointsIds.Remove(joint.Id);
+        ConnectedJointsIds.Remove(joint.Eid);
         joint.ConnectedPipes.RemoveAll(pipe => pipesBetweenJoints.Contains(pipe));
-        joint.ConnectedJointsIds.Remove(Id);
+        joint.ConnectedJointsIds.Remove(Eid);
         foreach (var pipe in pipesBetweenJoints)
         {
             PipeRemovedEvent.Invoke(pipe);
@@ -129,14 +139,13 @@ public partial class PipeJoint : PersistentArea3D<PipeJoint.SerializationData>, 
             var collisionShape = new CollisionShape3D();
             var cylinderShape = new CylinderShape3D();
             cylinderShape.Height = pipeSize.Z;
-            cylinderShape.Radius = pipeSize.X * 0.5f;
+            cylinderShape.Radius = pipeSize.X;
             collisionShape.Shape = cylinderShape;
             pipe.CollisionShape = collisionShape;
             pipe.AddChild(collisionShape);
             // The collision shape is created with the Z axis pointing up, but we want it to point forward.
-            collisionShape.RotateObjectLocal(Vector3.Right, Mathf.Tau / 4);
-            pipe.GlobalTransform =
-                transform.TranslatedLocal(new Vector3(0.0f, 0.0f, -(pipeSize.Z * i + pipeSize.Z * 0.5f)));
+            collisionShape.RotateObjectLocal(Vector3.Right, Mathf.Tau * 0.25f);
+            pipe.GlobalTransform = transform.TranslatedLocal(new Vector3(0.0f, 0.0f, -(pipeSize.Z * (i + 0.5f))));
             pipes.Add(pipe);
         }
 
@@ -158,26 +167,28 @@ public partial class PipeJoint : PersistentArea3D<PipeJoint.SerializationData>, 
     public override object Save()
     {
         return new SerializationData(
-            id: Id,
+            eid: Eid,
             gt: GD.VarToStr(GlobalTransform),
-            li: _lineId,
+            li: LineId,
             cj: ConnectedJointsIds.ToArray()
         );
     }
 
     public override void Load()
     {
-        Id = SaveContent.Id;
+        Eid = SaveContent!.Eid;
         GlobalTransform = (Transform3D)GD.StrToVar(SaveContent.Gt);
-        _lineId = SaveContent.Li;
+        LineId = SaveContent.Li;
+        ConnectedJointsIds.AddRange(SaveContent.Cj);
     }
 
+    public override bool InstantiateOnLoad() => true;
 
     public class SerializationData
     {
-        public SerializationData(ulong id, string gt, uint? li, ulong[] cj)
+        public SerializationData(Eid eid, string gt, uint? li, Eid[] cj)
         {
-            Id = id;
+            Eid = eid;
             Gt = gt;
             Li = li;
             Cj = cj;
@@ -186,7 +197,7 @@ public partial class PipeJoint : PersistentArea3D<PipeJoint.SerializationData>, 
         /// <summary>
         /// Unique PipeJoint Id
         /// </summary>
-        public ulong Id { get; set; }
+        public Eid Eid { get; set; }
 
         /// <summary>
         /// GlobalTransform
@@ -202,6 +213,6 @@ public partial class PipeJoint : PersistentArea3D<PipeJoint.SerializationData>, 
         /// <summary>
         /// ConnectedJointsIds
         /// </summary>
-        public ulong[] Cj { get; set; }
+        public Eid[] Cj { get; set; }
     }
 }

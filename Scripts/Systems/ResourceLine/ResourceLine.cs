@@ -24,11 +24,6 @@ public class ResourceLine<TJoint, TConnector> where TJoint : IResourceJoint wher
     public void AddConnector(TConnector connector)
     {
         _connectors.Add(connector);
-        if (connector is IResourceInputConnector)
-        {
-            ((IResourceInputConnector)connector).BindSource(_onResourceRequested);
-            ((IResourceInputConnector)connector).Activate();
-        }
     }
 
     public void MergeWith(ResourceLine<TJoint, TConnector> resourceLineB)
@@ -46,11 +41,13 @@ public class ResourceLine<TJoint, TConnector> where TJoint : IResourceJoint wher
         }
     }
 
-    private float _onResourceRequested(
+    public float RequestResource(
         float amount,
         IResourceInputConnector inputConnector
     )
     {
+        GD.Print("Resource requested");
+        GD.Print(_id);
         var inputOwner = inputConnector.GetOwner();
         var connectorsWithResource = _connectors.Where(e =>
             e is IResourceOutputConnector
@@ -60,22 +57,11 @@ public class ResourceLine<TJoint, TConnector> where TJoint : IResourceJoint wher
         if (connectorsWithResource.Length == 0) return 0f;
 
         var amountGathered = 0f;
-        for (var i = 0; i < 5; i++)
+        var amountPerConnector = (amount - amountGathered) / connectorsWithResource.Length;
+        foreach (var connector in connectorsWithResource)
         {
-            var amountPerConnector = (amount - amountGathered) / connectorsWithResource.Length;
-            GD.Print("----------------------------------------");
-            GD.Print(inputConnector.GetOwner().GetType());
-            GD.Print($"amountPerConnector: {amountPerConnector}");
-            foreach (var connector in connectorsWithResource)
-            {
-                var gathered =
-                    ((IResourceOutputConnector)connector).AskForResource(amountPerConnector);
-                GD.Print(connector.GetOwner().GetType());
-                GD.Print($"Amount gathered: {gathered}");
-                amountGathered += gathered;
-            }
-
-            if (amountGathered >= amount) break;
+            var gathered = ((IResourceOutputConnector)connector).AskForResource(amountPerConnector);
+            amountGathered += gathered;
         }
 
         return amountGathered;

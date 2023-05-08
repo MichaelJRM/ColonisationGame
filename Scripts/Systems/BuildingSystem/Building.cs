@@ -108,6 +108,8 @@ public partial class Building : PersistentNode3D<Building.SerializationData>
         GlobalTransform = (Transform3D)GD.StrToVar(SaveContent.Gt);
     }
 
+    public override bool InstantiateOnLoad() => true;
+
     public class SerializationData
     {
         public SerializationData(string gt)

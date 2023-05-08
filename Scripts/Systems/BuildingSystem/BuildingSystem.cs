@@ -32,13 +32,13 @@ public sealed partial class BuildingSystem : Node, IPersistentManager
         AddChild(child);
     }
 
-    public IPersistent[] _GetPersistentChildren()
+    public IPersistent[] _GetPersistentNodes()
     {
         return GetChildren().OfType<IPersistent>().ToArray();
     }
 
     public string _GetSavePath()
     {
-        return "user://buildingSystem.save";
+        return "buildingSystem.save";
     }
 }

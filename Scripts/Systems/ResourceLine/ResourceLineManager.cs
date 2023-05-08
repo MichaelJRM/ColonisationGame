@@ -7,13 +7,20 @@ public class ResourceLineManager<TJoint, TConnector> where TJoint : IResourceJoi
     private readonly Dictionary<uint, ResourceLine<TJoint, TConnector>> _lines = new();
     private uint _lineIdCounter;
 
+
+    public float RequestResource(float amount, IResourceInputConnector inputConnector)
+    {
+        var lineId = (uint)inputConnector.GetLineId()!;
+        var resourceLine = _lines[lineId];
+        return resourceLine.RequestResource(amount, inputConnector);
+    }
+
     public uint CreateLine()
     {
         var line = new ResourceLine<TJoint, TConnector>(_lineIdCounter);
         _lines.Add(_lineIdCounter, line);
         return _lineIdCounter++;
     }
-
 
     public void AddJoint(uint lineId, TJoint joint)
     {

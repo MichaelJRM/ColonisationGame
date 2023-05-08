@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BaseBuilding.scripts.common;
+using BaseBuilding.Scripts.Systems.SaveSystem;
 using BaseBuilding.scripts.util.common;
+using BaseBuilding.Scripts.Util.objects;
 using Godot;
 
 namespace BaseBuilding.Scripts.Systems.EnergySystem;
 
-public partial class WireJoint : Area3D, IResourceJoint
+public partial class WireJoint : PersistentArea3D<WireJoint.SerializationData>, IResourceJoint
 {
     [Export] private Label3D _debugLineIdLabel = null!;
     [Export] protected uint MaxConnectionsAllowed = 10;
@@ -20,45 +23,54 @@ public partial class WireJoint : Area3D, IResourceJoint
         new(-0.043947f, -0.03193f),
     };
 
-    protected readonly List<WireJoint> ConnectedJoints = new();
+    public readonly List<Eid> ConnectedJointsIds = new();
     private readonly List<(MeshInstance3D, WireJoint)> _wireMeshInstances = new();
-    private uint? _lineId;
+    protected uint? LineId;
+    public Eid Eid { get; protected set; }
 
     public void SetLineId(uint? lineId)
     {
-        _lineId = lineId;
-        _debugLineIdLabel.Text = $"LineID: {_lineId.ToString()}";
+        LineId = lineId;
+        _debugLineIdLabel.Text = $"LineID: {LineId.ToString()}";
     }
 
     public uint? GetLineId()
     {
-        return _lineId;
+        return LineId;
+    }
+
+    public void SetId(Eid id)
+    {
+        Eid = id;
     }
 
     public bool IsConnectedToLine()
     {
-        return _lineId != null;
+        return LineId != null;
     }
 
     public bool CanConnect()
     {
-        return ConnectedJoints.Count < MaxConnectionsAllowed;
+        return ConnectedJointsIds.Count < MaxConnectionsAllowed;
     }
 
-    public void SetId(ulong id)
+    public void ConnectToJoint(WireJoint other)
     {
-        throw new System.NotImplementedException();
+        if (!other.Eid.IsValid) throw new Exception("Other joint Eid is not valid!");
+
+        if (ConnectedJointsIds.Contains(other.Eid)) return;
+        ConnectedJointsIds.Add(other.Eid);
+        other.ConnectedJointsIds.Add(Eid);
+
+        CreateWireBetweenJoints(other);
     }
 
-    public void ConnectToJoint(WireJoint joint)
+    public void CreateWireBetweenJoints(WireJoint other)
     {
-        ConnectedJoints.Add(joint);
-        joint.ConnectedJoints.Add(this);
-
-        var mesh = CreateWire(joint.WireOrigin.GlobalTransform);
+        var mesh = CreateWire(other.WireOrigin.GlobalTransform);
         var meshInstance = new MeshInstance3D();
         meshInstance.Mesh = mesh;
-        _wireMeshInstances.Add((meshInstance, joint));
+        _wireMeshInstances.Add((meshInstance, other));
         AddChild(meshInstance);
     }
 
@@ -144,5 +156,58 @@ public partial class WireJoint : Area3D, IResourceJoint
         }
 
         return points;
+    }
+
+
+    public override object Save()
+    {
+        return new SerializationData(
+            eid: Eid,
+            gt: GD.VarToStr(GlobalTransform),
+            li: LineId,
+            cj: ConnectedJointsIds.ToArray()
+        );
+    }
+
+    public override void Load()
+    {
+        Eid = SaveContent!.Eid;
+        GlobalTransform = (Transform3D)GD.StrToVar(SaveContent.Gt);
+        LineId = SaveContent.Li;
+        ConnectedJointsIds.AddRange(SaveContent.Cj);
+    }
+
+    public override bool InstantiateOnLoad() => true;
+
+    public class SerializationData
+    {
+        public SerializationData(Eid eid, string gt, uint? li, Eid[] cj)
+        {
+            Eid = eid;
+            Gt = gt;
+            Li = li;
+            Cj = cj;
+        }
+
+        /// <summary>
+        /// Unique WireJoint Id
+        /// </summary>
+        public Eid Eid { get; set; }
+
+        /// <summary>
+        /// GlobalTransform
+        /// </summary>
+        public string Gt { get; set; }
+
+        /// <summary>
+        /// LineID
+        /// </summary>
+        public uint? Li { get; set; }
+
+
+        /// <summary>
+        /// ConnectedJointsIds
+        /// </summary>
+        public Eid[] Cj { get; set; }
     }
 }

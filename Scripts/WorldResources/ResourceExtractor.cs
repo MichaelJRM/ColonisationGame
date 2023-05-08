@@ -35,10 +35,6 @@ public partial class ResourceExtractor : Node3D
         building.PlacedEvent += _activate;
     }
 
-    private void _activate()
-    {
-        _wireInputConnector.Activate();
-    }
 
     protected float Extract(float amount)
     {
@@ -54,6 +50,11 @@ public partial class ResourceExtractor : Node3D
         var amountAvailable = _throttledGenerator.Generate(amount, Global.Instance.GameTimeInSeconds);
         var amountExtracted = ResourceDeposit.Take(amountAvailable);
         return amountExtracted;
+    }
+
+    private void _activate()
+    {
+        _wireInputConnector.Activate();
     }
 
     public override void _ExitTree()

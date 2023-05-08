@@ -10,7 +10,9 @@ public interface IPersistent
         var saveData = new Save
         {
             Sfp = GetSceneFilePath(),
-            C = Save()
+            C = Save(),
+            Nrp = GetNodeRelativePath(),
+            I = InstantiateOnLoad()
         };
         var persistentChildren = GetPersistentChildren();
         var childrenSaveData = new Save[persistentChildren.Length];
@@ -25,11 +27,13 @@ public interface IPersistent
         return saveData;
     }
 
-    public IPersistent[] GetPersistentChildren();
+    protected IPersistent[] GetPersistentChildren();
 
-    public string GetSceneFilePath();
+    protected string GetSceneFilePath();
 
-    public static Node Deserialize(Save save)
+    protected string GetNodeRelativePath();
+
+    public static Node DeserializeAndInstantiate(Save save)
     {
         var scene = GD.Load<PackedScene>(save.Sfp);
         var instance = scene.Instantiate<Node>();
@@ -38,16 +42,38 @@ public interface IPersistent
         persistentInstance.BeforeLoad();
         persistentInstance.Load();
         persistentInstance.AfterLoad();
+        DeserializeChildren(instance, save);
+        return instance;
+    }
 
+    public static void Deserialize(Node instance, Save save)
+    {
+        var persistentInstance = (IPersistent)instance;
+        persistentInstance.ProcessContent((JsonElement)save.C);
+        persistentInstance.BeforeLoad();
+        persistentInstance.Load();
+        persistentInstance.AfterLoad();
+        DeserializeChildren(instance, save);
+    }
+
+    private static void DeserializeChildren(Node instance, Save save)
+    {
         var children = save.Ch;
         foreach (var child in children)
         {
-            var childInstance = Deserialize(child);
-            instance.AddChild(childInstance);
+            if (child.I)
+            {
+                var childInstance = DeserializeAndInstantiate(child);
+                instance.AddChild(childInstance);
+            }
+            else
+            {
+                var childNode = instance.GetNode<IPersistent>(child.Nrp);
+                Deserialize((Node)childNode, child);
+            }
         }
-
-        return instance;
     }
+
 
     protected void ProcessContent(JsonElement saveContent);
 
@@ -60,4 +86,6 @@ public interface IPersistent
     public void AfterLoad();
 
     public void ClearSaveContent();
+
+    protected bool InstantiateOnLoad();
 }

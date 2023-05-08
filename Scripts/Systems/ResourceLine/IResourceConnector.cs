@@ -22,12 +22,6 @@ public delegate float OnResourceRequestedCallback(
 
 public interface IResourceInputConnector : IResourceConnector
 {
-    /// <summary>
-    /// Binds a callback to be called when this connector asks for a resource.
-    /// </summary>
-    /// <param name="onResourceRequestedCallback"></param>
-    public void BindSource(OnResourceRequestedCallback onResourceRequestedCallback);
-
     public float RequestResource(float amount);
 }
 

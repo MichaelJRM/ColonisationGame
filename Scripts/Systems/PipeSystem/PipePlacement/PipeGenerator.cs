@@ -18,7 +18,7 @@ public partial class PipeGenerator : Node
     private readonly PackedScene _temporaryPipeScene;
     private readonly Color _invalidPlacementColor = new(1.0f, 0.0f, 0.0f, 0.2f);
     private readonly Color _validPlacementColor = new(0.0f, 1.0f, 0.0f, 0.2f);
-    private Vector3 _lastPosition = Vector3.Zero;
+    private Vector3 _targetPosition = Vector3.Zero;
     private Vector3 _pipeSize;
     private ArrayMesh _pipeCommonMesh = null!;
 
@@ -48,8 +48,9 @@ public partial class PipeGenerator : Node
         Transform3D to
     )
     {
-        if (_lastPosition == to.Origin) return;
-        _lastPosition = to.Origin;
+        IsPlacementValid = _calculateIfPlacementIsValid();
+        if (_targetPosition == to.Origin) return;
+        _targetPosition = to.Origin;
 
         var distance = from.Origin.DistanceTo(to.Origin);
         var count = Mathf.CeilToInt(distance / _pipeSize.Z);
@@ -81,7 +82,7 @@ public partial class PipeGenerator : Node
                     var collisionShape = new CollisionShape3D();
                     var shape = new CylinderShape3D();
                     shape.Height = _pipeSize.Z;
-                    shape.Radius = _pipeSize.X / 2;
+                    shape.Radius = _pipeSize.X;
                     collisionShape.Shape = shape;
                     pipe.CollisionShape = collisionShape;
                     // The collision shape is created with the Z axis pointing up, but we want it to point forward.
@@ -134,85 +135,14 @@ public partial class PipeGenerator : Node
         ((CylinderShape3D)lastPipe.CollisionShape.Shape).Height = Mathf.Max(_pipeSize.Z - overflow, 0.0f);
 
 
-        IsPlacementValid = _calculateIfPlacementIsValid();
         _materialOverlay.AlbedoColor = IsPlacementValid && _isPlacementValidCallback.Invoke()
             ? _validPlacementColor
             : _invalidPlacementColor;
     }
 
-    public List<(Pipe, Vector3)> GetIntersectingPipes()
+    public List<TemporaryPipe> GetPipes()
     {
-        var snap = new Vector3(0.01f, 0.01f, 0.01f);
-        var allIntersectingPipes = new List<(Pipe, Vector3)>(_pipes.Count);
-        var overlappingPerTemporaryPipe = OverlappingPipesPerTemporaryPipe();
-
-        var firstTemporaryPipeGlobalPosition = overlappingPerTemporaryPipe.Length > 0
-            ? overlappingPerTemporaryPipe[0].Item1.GlobalPosition
-            : Vector3.Zero;
-
-        foreach (var (temporaryPipe, pipes) in overlappingPerTemporaryPipe)
-        {
-            if (pipes.Count == 0) continue;
-            var pipesSortedByDistance = pipes
-                .Select(e => (e, e.GlobalPosition.DistanceSquaredTo(firstTemporaryPipeGlobalPosition)))
-                .OrderBy(e => e.Item2)
-                .Select(e => e.e)
-                .ToArray();
-
-            foreach (var pipe in pipesSortedByDistance)
-            {
-                var intersectionPoint = _calculateIntersectionPoint(pipe, temporaryPipe);
-                if (intersectionPoint == null) continue;
-
-                foreach (var intersectingPipe in CollectionsMarshal.AsSpan(allIntersectingPipes))
-                {
-                    if (intersectingPipe.Item2.Snapped(snap) == ((Vector3)intersectionPoint).Snapped(snap))
-                    {
-                        intersectionPoint = null;
-                        break;
-                    }
-                }
-
-                var canSave = intersectionPoint != null;
-                if (!canSave) continue;
-                allIntersectingPipes.Add((pipe, (Vector3)intersectionPoint!));
-            }
-        }
-
-        return allIntersectingPipes;
-
-        (TemporaryPipe, List<Pipe>)[] OverlappingPipesPerTemporaryPipe()
-        {
-            var overlappingPipesPerPipe = new (TemporaryPipe, List<Pipe>)[_pipes.Count];
-            for (var i = 0; i < overlappingPipesPerPipe.Length; i++)
-            {
-                var overlappingAreas = _pipes[i].GetOverlappingAreas();
-                var overlappingPipes = new List<Pipe>();
-                for (var j = 0; j < overlappingAreas.Count; j++)
-                {
-                    var area = overlappingAreas[j];
-                    if (area.GetType() == typeof(Pipe))
-                    {
-                        overlappingPipes.Add((Pipe)area);
-                    }
-                }
-
-                overlappingPipesPerPipe[i] = (_pipes[i], overlappingPipes);
-            }
-
-            return overlappingPipesPerPipe;
-        }
-    }
-
-    private Vector3? _calculateIntersectionPoint(Pipe pipe, TemporaryPipe temporaryPipe)
-    {
-        var intersectionPoint = MathUtil.CalculateIntersectionPoint(
-            pipe.GlobalTransform,
-            temporaryPipe.GlobalTransform
-        );
-        var pipeLength = ((CylinderShape3D)pipe.CollisionShape.Shape).Height;
-        if (pipe.GlobalPosition.DistanceTo(intersectionPoint) > pipeLength) return null;
-        return intersectionPoint;
+        return _pipes;
     }
 
     private bool _calculateIfPlacementIsValid()
@@ -242,10 +172,11 @@ public partial class PipeGenerator : Node
             var overlappingAreas = temporaryPipe.GetOverlappingAreas();
             for (var i = 0; i < overlappingAreas.Count; i++)
             {
-                if (overlappingAreas[i].Owner is Building)
-                {
-                    return false;
-                }
+                var isCollidingWithPipeJoint = overlappingAreas[i].GlobalPosition != _targetPosition &&
+                                               overlappingAreas[i].GetType() == typeof(PipeJoint);
+                if (isCollidingWithPipeJoint) return false;
+                var isCollidingWithBuilding = overlappingAreas[i].GetType() == typeof(BuildingCollisionArea);
+                if (isCollidingWithBuilding) return false;
             }
         }
 

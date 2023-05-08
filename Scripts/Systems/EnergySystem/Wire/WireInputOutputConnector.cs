@@ -6,7 +6,6 @@ namespace BaseBuilding.Scripts.Systems.EnergySystem.Wire;
 public partial class WireInputOutputConnector : WireConnector, IResourceOutputConnector, IResourceInputConnector
 {
     private bool _hasBeenActivated = false;
-    private OnResourceRequestedCallback? _onResourceRequestedCallback;
 
     public new void Activate()
     {
@@ -17,14 +16,9 @@ public partial class WireInputOutputConnector : WireConnector, IResourceOutputCo
         }
     }
 
-    public void BindSource(OnResourceRequestedCallback onResourceRequestedCallback)
-    {
-        _onResourceRequestedCallback = onResourceRequestedCallback;
-    }
-
     public float RequestResource(float amount)
     {
-        return _onResourceRequestedCallback!.Invoke(amount, this);
+        return EnergySystem.Instance.WireLineManager.RequestResource(amount, this);
     }
 
     private ResourceAskedCallback _resourceAskedCallback = null!;

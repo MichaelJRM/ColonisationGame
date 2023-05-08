@@ -7,7 +7,7 @@ namespace BaseBuilding.Scripts.Systems.SaveSystem;
 public abstract partial class PersistentArea3D<T> : Area3D, IPersistent
 {
     protected bool LoadedFromSave = false;
-    public T? SaveContent { get; private set; } = default!;
+    protected T? SaveContent { get; private set; } = default!;
 
     public IPersistent[] GetPersistentChildren()
     {
@@ -17,6 +17,13 @@ public abstract partial class PersistentArea3D<T> : Area3D, IPersistent
     public string GetSceneFilePath()
     {
         return SceneFilePath;
+    }
+
+    public string GetNodeRelativePath()
+    {
+        var path = GetPathTo(GetParent(), true);
+        path = path == ".." ? "" : path;
+        return $"{path}{Name}";
     }
 
     public void ProcessContent(JsonElement saveContent)
@@ -42,4 +49,6 @@ public abstract partial class PersistentArea3D<T> : Area3D, IPersistent
     {
         SaveContent = default(T);
     }
+
+    public abstract bool InstantiateOnLoad();
 }

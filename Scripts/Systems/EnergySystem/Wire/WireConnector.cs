@@ -35,11 +35,22 @@ public partial class WireConnector : WireJoint, IResourceConnector
     {
         Monitorable = true;
         this.EnableColliders();
+
+        if (!LoadedFromSave)
+        {
+            Eid = EnergySystem.Instance.GetNewJointEid();
+            EnergySystem.Instance.RegisterWireConnector(this);
+        }
+    }
+
+    public object GetOwner()
+    {
+        return GetParent();
     }
 
     public bool IsConnected()
     {
-        return ConnectedJoints.Count > 0;
+        return ConnectedJointsIds.Count > 0;
     }
 
     public bool AcceptsResource(WorldResource worldResource)
@@ -47,10 +58,6 @@ public partial class WireConnector : WireJoint, IResourceConnector
         return worldResource.Id == ((WorldResource)_resource).Id;
     }
 
-    public object GetOwner()
-    {
-        return Owner;
-    }
 
     public WorldResource GetAcceptedResource()
     {
@@ -76,4 +83,14 @@ public partial class WireConnector : WireJoint, IResourceConnector
 
         return warnings.ToArray();
     }
+
+    public override void Load()
+    {
+        Eid = SaveContent!.Eid;
+        LineId = SaveContent.Li;
+        ConnectedJointsIds.AddRange(SaveContent.Cj);
+        EnergySystem.Instance.RegisterWireConnector(this);
+    }
+
+    public override bool InstantiateOnLoad() => false;
 }

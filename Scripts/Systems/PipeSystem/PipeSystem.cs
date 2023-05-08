@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using BaseBuilding.Scripts.Systems;
 using BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
 using BaseBuilding.Scripts.Systems.SaveSystem;
 using BaseBuilding.scripts.util.common;
+using BaseBuilding.Scripts.Util.objects;
 using Godot;
 
 namespace BaseBuilding.scripts.systems.PipeSystem;
@@ -17,12 +17,12 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
     [Export] private PackedScene _temporaryPipeScene = null!;
     [Export] private Mesh _pipeJointMesh = null!;
 
-    private readonly ResourceLineManager<PipeJoint, PipeConnector> _pipeLineManager = new();
+    public readonly ResourceLineManager<PipeJoint, PipeConnector> PipeLineManager = new();
     private readonly ResourceLineRenderingManager _pipeLineRenderingManager = new();
     private bool _isEnabled;
     private Scripts.Systems.PipeSystem.PipePlacement.PipePlacerSystem? _pipePlacer;
-    private readonly Dictionary<ulong, PipeJoint> _pipeJoints = new();
-    private ulong _universalJointIdCounter;
+    private readonly Dictionary<Eid, PipeJoint> _pipeJoints = new();
+    private ulong _universalJointIdCounter = 1;
 
     private PipeSystem()
     {
@@ -36,19 +36,20 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
         AddChild(_pipeLineRenderingManager);
     }
 
-    public PipeJoint GetPipeJoint(ulong id) => _pipeJoints[id];
+    public PipeJoint GetPipeJoint(Eid rid) => _pipeJoints[rid];
 
-    public void RegisterPipeJoint(PipeJoint joint)
+    public void RegisterPipeConnector(PipeConnector connector)
     {
-        joint.PipeAddedEvent += _onPipeAdded;
-        joint.PipeRemovedEvent += _OnPipeRemoved;
-        joint.TreeExiting += OnExitedTree;
+        _pipeJoints.Add(connector.Eid, connector);
+        connector.PipeAddedEvent += _onPipeAdded;
+        connector.PipeRemovedEvent += _OnPipeRemoved;
+        connector.TreeExiting += OnExitedTree;
 
         void OnExitedTree()
         {
-            joint.PipeAddedEvent -= _onPipeAdded;
-            joint.PipeRemovedEvent -= _OnPipeRemoved;
-            joint.TreeExiting -= OnExitedTree;
+            connector.PipeAddedEvent -= _onPipeAdded;
+            connector.PipeRemovedEvent -= _OnPipeRemoved;
+            connector.TreeExiting -= OnExitedTree;
         }
     }
 
@@ -103,7 +104,7 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
     private void _completePipePlacement(PipeJoint[] pipeJoints)
     {
         if (!_pipePlacer!.IsPlacementValid) return;
-        var processedJoints = new PipeJoint[pipeJoints.Length].AsSpan();
+        var processedJoints = new PipeJoint[pipeJoints.Length];
 
         for (var i = 0; i < pipeJoints.Length; i++)
         {
@@ -138,7 +139,7 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
                 PipeJoint CreatePermanentPipeJointAtPosition(Vector3 globalPosition)
                 {
                     var instance = _pipeJointScene.Instantiate<PipeJoint>();
-                    instance.SetId(GetNewJointId());
+                    instance.SetId(GetNewJointEid());
                     instance.Position = globalPosition;
                     _commitPipeJoint(instance);
                     _sentJointToRenderingManager(instance);
@@ -148,7 +149,7 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
                 PipeJoint CreatePermanentPipeJointOnPipe(Pipe pipe, Vector3 globalPosition)
                 {
                     var instance = _pipeJointScene.Instantiate<PipeJoint>();
-                    instance.SetId(GetNewJointId());
+                    instance.SetId(GetNewJointEid());
                     instance.OwnerPipe = pipe;
                     instance.Position = MathUtil.GetParallelPosition(pipe.GlobalTransform, globalPosition);
                     _commitPipeJoint(instance);
@@ -157,7 +158,7 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
                     pipe.BackJoint.ConnectToJoint(instance);
                     pipe.FrontJoint.ConnectToJoint(instance);
                     var pipeLineId = (uint)(pipe.BackJoint.GetLineId() ?? pipe.FrontJoint.GetLineId())!;
-                    _pipeLineManager.AddJoint(pipeLineId, instance);
+                    PipeLineManager.AddJoint(pipeLineId, instance);
                     return instance;
                 }
             }
@@ -166,7 +167,7 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
         void ConnectJoints(PipeJoint startPipeJoint, PipeJoint endPipeJoint)
         {
             startPipeJoint.ConnectToJoint(endPipeJoint);
-            _pipeLineManager.Connect(startPipeJoint, endPipeJoint);
+            PipeLineManager.Connect(startPipeJoint, endPipeJoint);
         }
     }
 
@@ -176,7 +177,7 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
         joint.PipeRemovedEvent += _OnPipeRemoved;
         joint.TreeExited += OnJointRemoved;
         AddChild(joint);
-        _pipeJoints.Add(joint.Id, joint);
+        _pipeJoints.Add(joint.Eid, joint);
 
 
         void OnJointRemoved()
@@ -236,42 +237,63 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
         }
     }
 
-    public IPersistent[] _GetPersistentChildren()
+    public IPersistent[] _GetPersistentNodes()
     {
-        return _pipeJoints.Values.ToArray();
+        // We ignore PipeConnectors as those are saved as part of the building they belong to.
+        // ReSharper disable once CoVariantArrayConversion
+        return _pipeJoints.Values.Where(e => e is not PipeConnector).ToArray();
     }
 
     public string _GetSavePath()
     {
-        return "user://pipeSystem.save";
+        return "pipeSystem.save";
     }
 
     public void _AfterLoad()
     {
-        var largestId = _pipeJoints.MaxBy(e => e.Value.Id).Value.Id;
-        _universalJointIdCounter = largestId + 1;
-        var groupedJoints = _pipeJoints.Values.GroupBy(joint => joint.GetLineId()).ToArray();
+        if (_pipeJoints.Count == 0) return;
 
-        foreach (var group in groupedJoints)
+        var largestEid = _pipeJoints.MaxBy(e => e.Value.Eid).Value.Eid;
+        _universalJointIdCounter = largestEid.Id + 1;
+        var jointsGroupedByLineId = _pipeJoints.Values.GroupBy(joint => joint.GetLineId()).ToArray();
+
+        var jointConnectionData = new Dictionary<Eid, List<Eid>>();
+        foreach (var key in _pipeJoints.Keys)
         {
-            var lineId = (uint)group.Key!;
-            _pipeLineManager.CreateLine(lineId);
+            jointConnectionData.Add(key, new List<Eid>());
+        }
 
-            foreach (var pipeJoint in group)
+        foreach (var group in jointsGroupedByLineId)
+        {
+            if (group.Key == null) continue;
+            var lineId = (uint)group.Key;
+            PipeLineManager.CreateLine(lineId);
+
+            var joints = group.ToArray();
+
+            foreach (var pipeJoint in joints)
             {
-                var connectedJointsIds = pipeJoint.SaveContent.Cj;
-                foreach (var connectedJointId in connectedJointsIds)
-                {
-                    pipeJoint.ConnectToJoint(GetPipeJoint(connectedJointId));
-                }
+                ConnectJoints(pipeJoint);
+                PipeLineManager.AddBasedOnType(lineId, pipeJoint);
+            }
+        }
 
-                _pipeLineManager.AddBasedOnType(lineId, pipeJoint);
+        void ConnectJoints(PipeJoint joint)
+        {
+            var thisData = jointConnectionData[joint.Eid];
+            foreach (var connectedJointId in joint.ConnectedJointsIds)
+            {
+                if (thisData.Contains(connectedJointId)) continue;
+                thisData.Add(connectedJointId);
+                jointConnectionData[connectedJointId].Add(joint.Eid);
+                var pipeJoint = GetPipeJoint(connectedJointId);
+                joint.CreatePipesBetweenJoints(pipeJoint);
             }
         }
     }
 
-    public ulong GetNewJointId()
+    public Eid GetNewJointEid()
     {
-        return _universalJointIdCounter++;
+        return new Eid(_universalJointIdCounter++);
     }
 }

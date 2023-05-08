@@ -7,7 +7,6 @@ namespace BaseBuilding.Scripts.Systems.SaveSystem;
 
 public abstract partial class PersistentNode3D<T> : Node3D, IPersistent
 {
-    private ulong? Id { get; set; }
     protected bool LoadedFromSave = false;
     protected T? SaveContent { get; private set; } = default!;
 
@@ -19,6 +18,13 @@ public abstract partial class PersistentNode3D<T> : Node3D, IPersistent
     public string GetSceneFilePath()
     {
         return SceneFilePath;
+    }
+
+    public string GetNodeRelativePath()
+    {
+        var path = GetPathTo(GetParent(), true);
+        path = path == ".." ? "" : path;
+        return $"{path}{Name}";
     }
 
     public void ProcessContent(JsonElement saveContent)
@@ -44,4 +50,6 @@ public abstract partial class PersistentNode3D<T> : Node3D, IPersistent
     {
         SaveContent = default(T);
     }
+
+    public abstract bool InstantiateOnLoad();
 }
