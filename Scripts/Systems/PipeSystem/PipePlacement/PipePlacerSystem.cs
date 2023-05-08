@@ -247,7 +247,7 @@ public partial class PipePlacerSystem : Node
             foreach (var overlappingPipe in CollectionsMarshal.AsSpan(overlappingPipes))
             {
                 if (_startJoint!.ConnectedPipes.Contains(overlappingPipe)) continue;
-                if (_endJoint.ConnectedPipes.Contains(overlappingPipe)) continue;
+                if (_endJoint!.ConnectedPipes.Contains(overlappingPipe)) continue;
                 if (intersections.Any(e => e.Item1 == overlappingPipe)) continue;
                 var intersectionPoint = MathUtil.CalculateIntersectionPoint(
                     overlappingPipe.GlobalTransform,

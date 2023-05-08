@@ -84,6 +84,7 @@ public partial class Building : PersistentNode3D<Building.SerializationData>
     {
         var warnings = new List<string>();
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (_collisionArea is null)
         {
             warnings.Add("CollisionArea not assigned!");
@@ -105,7 +106,7 @@ public partial class Building : PersistentNode3D<Building.SerializationData>
 
     public override void Load()
     {
-        GlobalTransform = (Transform3D)GD.StrToVar(SaveContent.Gt);
+        GlobalTransform = (Transform3D)GD.StrToVar(SaveContent!.Gt);
     }
 
     public override bool InstantiateOnLoad() => true;

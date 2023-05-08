@@ -6,7 +6,6 @@ namespace BaseBuilding.scripts.common;
 public partial class TickComponent : Node
 {
     private Action? _onTick;
-    private Action? _onPhysicsTick;
     private float _tickRate = 1f;
     private double _timeSinceLastTick;
 
