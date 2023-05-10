@@ -19,9 +19,9 @@ public sealed partial class PipeSystem : Node3D, IPersistentManager
 
     public readonly ResourceLineManager<PipeJoint, PipeConnector> PipeLineManager = new();
     private readonly ResourceLineRenderingManager _pipeLineRenderingManager = new();
+    private readonly Dictionary<Eid, PipeJoint> _pipeJoints = new();
     private bool _isEnabled;
     private Scripts.Systems.PipeSystem.PipePlacement.PipePlacerSystem? _pipePlacer;
-    private readonly Dictionary<Eid, PipeJoint> _pipeJoints = new();
     private ulong _universalJointIdCounter = 1;
 
     private PipeSystem()

@@ -15,10 +15,10 @@ public partial class ResourceConverter : Node
     [Export] private int _inputRate = 1;
 
     // Workaround while Godot doesn't support Interface exports.
-    [Export] private Area3D[] _resourceInputConnectors = Array.Empty<Area3D>();
-    IResourceInputConnector[] _iResourceInputConnectors = Array.Empty<IResourceInputConnector>();
-    [Export] private Area3D[] _resourceOutputConnectors = Array.Empty<Area3D>();
-    IResourceOutputConnector[] _iResourceOutputConnectors = Array.Empty<IResourceOutputConnector>();
+    [Export] private Area3D[] __resourceInputConnectors = Array.Empty<Area3D>();
+    protected IResourceInputConnector[] _resourceInputConnectors = Array.Empty<IResourceInputConnector>();
+    [Export] private Area3D[] __resourceOutputConnectors = Array.Empty<Area3D>();
+    protected IResourceOutputConnector[] _resourceOutputConnectors = Array.Empty<IResourceOutputConnector>();
 
     // ----------------------------------------------------------
     [Export] private ResourceConversionData[] _resourceConversionData = Array.Empty<ResourceConversionData>();
@@ -38,17 +38,16 @@ public partial class ResourceConverter : Node
         building.PlacedEvent += _activate;
 
         // Workaround while Godot doesn't support Interface exports.
-        _iResourceInputConnectors = Array.ConvertAll(_resourceInputConnectors, e => (IResourceInputConnector)e);
-        _iResourceOutputConnectors = Array.ConvertAll(_resourceOutputConnectors, e => (IResourceOutputConnector)e);
+        _resourceInputConnectors = Array.ConvertAll(__resourceInputConnectors, e => (IResourceInputConnector)e);
+        _resourceOutputConnectors = Array.ConvertAll(__resourceOutputConnectors, e => (IResourceOutputConnector)e);
     }
 
     private void _activate()
     {
         _initResourceData();
-        _activatePipeConnectors();
+        _activateConnectors();
         _initTickComponents();
     }
-
 
     private void _initResourceData()
     {
@@ -63,12 +62,12 @@ public partial class ResourceConverter : Node
         }
     }
 
-    private void _activatePipeConnectors()
+    private void _activateConnectors()
     {
-        foreach (var pipeInputConnector in _iResourceInputConnectors) pipeInputConnector.Activate();
+        foreach (var inputConnector in _resourceInputConnectors) inputConnector.Activate();
         foreach (var conversionData in _resourceConversionData)
         {
-            foreach (var connector in _iResourceOutputConnectors)
+            foreach (var connector in _resourceOutputConnectors)
             {
                 if (connector.AcceptsResource(conversionData.OutputResource))
                 {
@@ -115,7 +114,7 @@ public partial class ResourceConverter : Node
             var storageAmount = _inputResourceStorageAmount[conversionData.InputResource.Id];
             var capacityAmount = _inputResourceStorageCapacity[conversionData.InputResource.Id];
             if (storageAmount >= capacityAmount) continue;
-            foreach (var connector in _iResourceInputConnectors)
+            foreach (var connector in _resourceInputConnectors)
             {
                 if (connector.IsConnectedToLine() && connector.AcceptsResource(conversionData.InputResource))
                 {
@@ -158,9 +157,9 @@ public partial class ResourceConverter : Node
 
     private void _validate()
     {
-        if (_resourceInputConnectors.Length == 0)
+        if (__resourceInputConnectors.Length == 0)
             throw new Exception("ResourceConverter: Resource input connectors not assigned!");
-        if (_resourceOutputConnectors.Length == 0)
+        if (__resourceOutputConnectors.Length == 0)
             throw new Exception("ResourceConverter: Resource output connectors not assigned!");
         if (_resourceConversionData.Length == 0)
             throw new Exception("ResourceConverter: Resource conversion data not assigned!");

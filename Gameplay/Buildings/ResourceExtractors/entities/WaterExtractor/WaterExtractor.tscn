@@ -24,7 +24,6 @@ _pipeOutputConnectors = [NodePath("../PipeOutputConnector")]
 _extractionRate = 10.0
 Resource = ExtResource("4_33wk6")
 _wireInputConnector = NodePath("../WireInputConnector")
-_energyConsumptionPerExtraction = 10.0
 
 [node name="Label3D" type="Label3D" parent="LiquidResourceExtractor" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.93884, -2.59462)

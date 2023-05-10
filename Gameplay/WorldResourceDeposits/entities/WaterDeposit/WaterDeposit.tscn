@@ -4,7 +4,7 @@
 [ext_resource type="Resource" uid="uid://ck3hhrhusu8mr" path="res://Gameplay/WorldResources/entities/WaterResource.tres" id="2_q1f75"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_4orus"]
-radius = 50.0
+radius = 20.0
 
 [node name="WaterDeposit" instance=ExtResource("1_cqli2")]
 _initialAmount = 1e+06

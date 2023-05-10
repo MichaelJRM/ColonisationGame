@@ -1,36 +1,21 @@
 ﻿using System.Globalization;
 using System.Linq;
 using BaseBuilding.scripts.systems.BuildingSystem;
-using BaseBuilding.Scripts.Systems.PipeSystem.PipeConnector;
+using BaseBuilding.Scripts.Systems.VehicleSystem;
 using Godot;
 
-namespace BaseBuilding.Scripts.WorldResources.LiquidResourceExtractor;
+namespace BaseBuilding.Scripts.WorldResources.SolidResourceExtractor;
 
-public partial class LiquidResourceExtractor : ResourceExtractor
+public partial class SolidResourceExtractor : ResourceExtractor
 {
-    [Export] private PipeOutputConnector[] _pipeOutputConnectors = System.Array.Empty<PipeOutputConnector>();
-
+    private VehicleConnector[] _vehicleConnectors = null!;
 
     public override void _Ready()
     {
         base._Ready();
         var building = GetParent<Building>();
-        building.PlacedEvent += _activate;
         building.IsPlacementValidCallbacks.Add(_doesHaveRequiredResource);
-    }
-
-    private void _activate()
-    {
-        _activatePipeConnectors();
-    }
-
-    private void _activatePipeConnectors()
-    {
-        foreach (var pipeConnector in _pipeOutputConnectors)
-        {
-            pipeConnector.BindOnResourceAsked(_onResourceAsked);
-            pipeConnector.Activate();
-        }
+        _vehicleConnectors = GetChildren().OfType<VehicleConnector>().ToArray();
     }
 
     private float _onResourceAsked(float amount)
@@ -48,11 +33,5 @@ public partial class LiquidResourceExtractor : ResourceExtractor
         return overlappingAreas.Any(
             area => area is ResourceDeposit.ResourceDeposit deposit && deposit.Resource.Id == Resource.Id
         );
-    }
-
-    public override void _ExitTree()
-    {
-        var building = GetParent<Building>();
-        building.PlacedEvent -= _activate;
     }
 }

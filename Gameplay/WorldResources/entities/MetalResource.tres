@@ -1,0 +1,8 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://b1cyegdnwsn0j"]
+
+[ext_resource type="Script" path="res://Scripts/WorldResources/WorldResource.cs" id="1_svjcd"]
+
+[resource]
+script = ExtResource("1_svjcd")
+Id = "Metal"
+Name = "Metal"

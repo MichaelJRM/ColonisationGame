@@ -43,7 +43,8 @@ public partial class SolarPanelCell : Node
 
     private float _onResourceAsked(float amount)
     {
-        return _throttledGenerator.Generate(amount, Global.Instance.GameTimeInSeconds);
+        var generated = _throttledGenerator.Generate(amount, Global.Instance.GameTimeInSeconds);
+        return generated;
     }
 
     private void _validate()

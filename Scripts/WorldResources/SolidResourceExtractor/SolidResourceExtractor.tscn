@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cmcppf5hqk2pg"]
+
+[ext_resource type="Script" path="res://Scripts/WorldResources/SolidResourceExtractor/SolidResourceExtractor.cs" id="1_lhyxl"]
+
+[node name="SolidResourceExtractor" type="Node3D"]
+script = ExtResource("1_lhyxl")

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Godot;
 
 namespace BaseBuilding.Scripts.Systems;
 
@@ -46,8 +45,6 @@ public class ResourceLine<TJoint, TConnector> where TJoint : IResourceJoint wher
         IResourceInputConnector inputConnector
     )
     {
-        GD.Print("Resource requested");
-        GD.Print(_id);
         var inputOwner = inputConnector.GetOwner();
         var connectorsWithResource = _connectors.Where(e =>
             e is IResourceOutputConnector

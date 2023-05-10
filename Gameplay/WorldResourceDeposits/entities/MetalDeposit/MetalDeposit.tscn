@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://jvg6snfqs1ui"]
+
+[ext_resource type="PackedScene" uid="uid://mku2kpidwu3j" path="res://Scripts/WorldResources/ResourceDeposit/ResourceDeposit.tscn" id="1_5wfk1"]
+[ext_resource type="Resource" uid="uid://b1cyegdnwsn0j" path="res://Gameplay/WorldResources/entities/MetalResource.tres" id="2_ssbj7"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_g8wq5"]
+radius = 20.0
+
+[node name="MetalDeposit" instance=ExtResource("1_5wfk1")]
+_initialAmount = 100000.0
+Resource = ExtResource("2_ssbj7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="0"]
+shape = SubResource("SphereShape3D_g8wq5")

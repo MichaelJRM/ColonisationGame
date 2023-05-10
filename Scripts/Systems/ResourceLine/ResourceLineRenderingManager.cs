@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using BaseBuilding.scripts.util.common;
 using Godot;
 
@@ -182,26 +184,36 @@ public partial class ResourceLineRenderingManager : Node
                 );
             }
 
+            _updateMultimeshInstanceTransforms();
+        }
+
+
+        /// <summary>
+        /// This has the same function as RenderingServer.MultimeshInstanceSetTransform() but instead of having to call
+        /// it for each instance, it sets all the transforms at once, which is much faster.
+        /// </summary>
+        private void _updateMultimeshInstanceTransforms()
+        {
             var buffer = new float[currentSize * 12]; // Each transform buffer has 12 floats
             var bufferIdx = 0;
 
-            foreach (var transform3D in _transforms)
+            foreach (var transform3D in CollectionsMarshal.AsSpan(_transforms))
             {
-                var basis = transform3D.Basis;
-                var origin = transform3D.Origin;
-                buffer[bufferIdx++] = basis.Row0.X;
-                buffer[bufferIdx++] = basis.Row0.Y;
-                buffer[bufferIdx++] = basis.Row0.Z;
-                buffer[bufferIdx++] = origin.X;
-                buffer[bufferIdx++] = basis.Row1.X;
-                buffer[bufferIdx++] = basis.Row1.Y;
-                buffer[bufferIdx++] = basis.Row1.Z;
-                buffer[bufferIdx++] = origin.Y;
-                buffer[bufferIdx++] = basis.Row2.X;
-                buffer[bufferIdx++] = basis.Row2.Y;
-                buffer[bufferIdx++] = basis.Row2.Z;
-                buffer[bufferIdx++] = origin.Z;
+                buffer[bufferIdx] = transform3D.Basis.Row0.X;
+                buffer[bufferIdx + 1] = transform3D.Basis.Row0.Y;
+                buffer[bufferIdx + 2] = transform3D.Basis.Row0.Z;
+                buffer[bufferIdx + 3] = transform3D.Origin.X;
+                buffer[bufferIdx + 4] = transform3D.Basis.Row1.X;
+                buffer[bufferIdx + 5] = transform3D.Basis.Row1.Y;
+                buffer[bufferIdx + 6] = transform3D.Basis.Row1.Z;
+                buffer[bufferIdx + 7] = transform3D.Origin.Y;
+                buffer[bufferIdx + 8] = transform3D.Basis.Row2.X;
+                buffer[bufferIdx + 9] = transform3D.Basis.Row2.Y;
+                buffer[bufferIdx + 10] = transform3D.Basis.Row2.Z;
+                buffer[bufferIdx + 11] = transform3D.Origin.Z;
+                bufferIdx += 12;
             }
+
 
             RenderingServer.MultimeshSetBuffer(MultiMesh, buffer);
         }

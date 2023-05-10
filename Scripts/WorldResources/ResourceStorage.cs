@@ -5,6 +5,7 @@ using System.Linq;
 using BaseBuilding.scripts.common;
 using BaseBuilding.Scripts.Systems;
 using BaseBuilding.scripts.systems.BuildingSystem;
+using BaseBuilding.Scripts.Systems.SaveSystem;
 using Godot;
 using Godot.Collections;
 using Array = System.Array;
@@ -12,7 +13,7 @@ using Array = System.Array;
 namespace BaseBuilding.Scripts.WorldResources;
 
 [Tool]
-public partial class ResourceStorage : Node
+public partial class ResourceStorage : PersistentNode<ResourceStorage.SerializationData>
 {
     [Export] private float _capacity = 1000f;
     [Export] private int _inputRateInSeconds = 1;
@@ -179,5 +180,35 @@ public partial class ResourceStorage : Node
         }
 
         return warnings.ToArray();
+    }
+
+    public override object Save()
+    {
+        return new SerializationData(
+            ca: _currentAmount
+        );
+    }
+
+    public override void Load()
+    {
+        _currentAmount = SaveContent!.Ca;
+    }
+
+    public override bool InstantiateOnLoad()
+    {
+        return false;
+    }
+
+    public class SerializationData
+    {
+        public SerializationData(float ca)
+        {
+            Ca = ca;
+        }
+
+        /// <summary>
+        /// CurrentAmount
+        /// </summary>
+        public float Ca { get; set; }
     }
 }

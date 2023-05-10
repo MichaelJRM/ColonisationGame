@@ -1,10 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://cl18532kcpf0t"]
+[gd_scene load_steps=12 format=3 uid="uid://di2bynb8u20sn"]
 
 [ext_resource type="Script" path="res://World/World.gd" id="1_1yah5"]
-[ext_resource type="PackedScene" uid="uid://bwslv5q00mylw" path="res://Gameplay/WorldResourceDeposits/entities/WaterDeposit.tscn" id="2_0mhrs"]
+[ext_resource type="PackedScene" uid="uid://bwslv5q00mylw" path="res://Gameplay/WorldResourceDeposits/entities/WaterDeposit/WaterDeposit.tscn" id="2_0mhrs"]
 [ext_resource type="Material" uid="uid://dc510q4aohars" path="res://Common/Materials/uvMaterial/uv_material.tres" id="2_n2k6v"]
 [ext_resource type="PackedScene" uid="uid://dr1ueqoukcc13" path="res://Scripts/Player/Player.tscn" id="3_0hsah"]
 [ext_resource type="PackedScene" uid="uid://bsugam4hycyvy" path="res://Assets/Temp/TPose/passive_marker_man.dae" id="5_e4lmd"]
+[ext_resource type="PackedScene" uid="uid://jvg6snfqs1ui" path="res://Gameplay/WorldResourceDeposits/entities/MetalDeposit/MetalDeposit.tscn" id="6_wdwg4"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_dgl7r"]
 size = Vector2(2000, 2000)
@@ -20,11 +21,13 @@ sky_material = SubResource("ProceduralSkyMaterial_p2wrh")
 [sub_resource type="Environment" id="Environment_5ihtt"]
 background_mode = 2
 sky = SubResource("Sky_wpbnd")
+ambient_light_source = 3
+reflected_light_source = 2
+volumetric_fog_density = 0.01
+adjustment_saturation = 1.55
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_1yah5")
-
-[node name="WaterDeposit" parent="." instance=ExtResource("2_0mhrs")]
 
 [node name="Terrain" type="Node" parent="."]
 
@@ -44,6 +47,8 @@ shape = SubResource("BoxShape3D_dd2sg")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 0.45778, 0.889065, 0, -0.889065, 0.45778, 0, 0, 0)
 shadow_enabled = true
+shadow_blur = 0.8
+directional_shadow_max_distance = 500.0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Lighting"]
 environment = SubResource("Environment_5ihtt")
@@ -51,3 +56,7 @@ environment = SubResource("Environment_5ihtt")
 [node name="Player" parent="." instance=ExtResource("3_0hsah")]
 
 [node name="passive_marker_man" parent="." instance=ExtResource("5_e4lmd")]
+
+[node name="WaterDeposit" parent="." instance=ExtResource("2_0mhrs")]
+
+[node name="MetalDeposit" parent="." instance=ExtResource("6_wdwg4")]

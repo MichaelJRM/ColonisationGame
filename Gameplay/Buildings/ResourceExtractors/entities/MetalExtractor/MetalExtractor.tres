@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://ff6vefjgciol"]
+
+[ext_resource type="PackedScene" uid="uid://27ggw4epwx03" path="res://Gameplay/Buildings/ResourceExtractors/entities/MetalExtractor/MetalExtractor.tscn" id="1_c44qi"]
+[ext_resource type="Script" path="res://Scripts/Systems/BuildingSystem/BuildingResource.cs" id="2_ciayt"]
+
+[resource]
+script = ExtResource("2_ciayt")
+Id = "MetalExtractor"
+Name = "MetalExtractor"
+Scene = ExtResource("1_c44qi")

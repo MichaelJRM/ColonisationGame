@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://yem0gc6p7dgs"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/VehicleSystem/VehicleConnector.cs" id="1_yd06l"]
+
+[node name="VehicleConnector" type="Node3D"]
+script = ExtResource("1_yd06l")

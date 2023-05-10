@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://c51lpsrror638"]
+
+[ext_resource type="Script" path="res://Scripts/Systems/VehicleSystem/Vehicle.cs" id="1_byr53"]
+[ext_resource type="PackedScene" uid="uid://ggaa8ns0uer4" path="res://Assets/Vehicles/ResourceTransporter.glb" id="2_u8r31"]
+
+[node name="ResourceTransporter" type="Node3D"]
+script = ExtResource("1_byr53")
+
+[node name="ResourceTransporter" parent="." instance=ExtResource("2_u8r31")]

@@ -15,11 +15,6 @@ public interface IResourceConnector : IResourceJoint
     bool AcceptsResource(WorldResource worldResource);
 }
 
-public delegate float OnResourceRequestedCallback(
-    float amount,
-    IResourceInputConnector inputConnector
-);
-
 public interface IResourceInputConnector : IResourceConnector
 {
     public float RequestResource(float amount);
